@@ -381,6 +381,8 @@ export default function GuitarPracticeSession() {
   const [use7ths,       setUse7ths]       = useState(true);
   const [leftHanded,    setLeftHanded]    = useState(true);
   const [keepAwake,     setKeepAwake]     = useState(true);
+  const [settingsOpen,  setSettingsOpen]  = useState(false);
+  const [helpOpen,      setHelpOpen]      = useState(false);
   const [selectedProgs, setSelectedProgs] = useState(["Random","Random","Random","Random"]);
   const [activeTab,     setActiveTab]     = useState("practice");
   const [session,       setSession]       = useState(null);
@@ -416,6 +418,13 @@ export default function GuitarPracticeSession() {
       if (wakeLockRef.current) { wakeLockRef.current.release(); wakeLockRef.current = null; }
     };
   }, [keepAwake]);
+
+  useEffect(() => {
+    if (!settingsOpen && !helpOpen) return;
+    function onKeyDown(e) { if (e.key === "Escape") { setSettingsOpen(false); setHelpOpen(false); } }
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [settingsOpen, helpOpen]);
 
   function newSession(u7=use7ths, progs=selectedProgs) {
     stopPlayback();
@@ -541,23 +550,17 @@ export default function GuitarPracticeSession() {
           <div style={{ fontSize:"10px",letterSpacing:"3px",color:"#666",textTransform:"uppercase",marginBottom:"3px" }}>Practice Session</div>
           <h1 style={{ margin:0,fontSize:"clamp(18px,3.5vw,26px)",fontWeight:700,color:"#f0ebe0",letterSpacing:"-0.5px" }}>WoodShed</h1>
         </div>
-        <button onClick={()=>newSession()} style={{ background:"#1a1a1a",border:"1px solid #333",borderRadius:"6px",color:"#c8a87a",fontFamily:"inherit",fontSize:"12px",padding:"8px 14px",cursor:"pointer" }}>⚄ New Session</button>
+        <div style={{ display:"flex",gap:"8px" }}>
+          <button onClick={()=>setHelpOpen(true)} aria-label="Help" style={{ background:"#1a1a1a",border:"1px solid #333",borderRadius:"6px",color:"#c8a87a",fontFamily:"inherit",fontSize:"14px",padding:"8px 12px",cursor:"pointer",lineHeight:1 }}>❓</button>
+          <button onClick={()=>setSettingsOpen(true)} aria-label="Settings" style={{ background:"#1a1a1a",border:"1px solid #333",borderRadius:"6px",color:"#c8a87a",fontFamily:"inherit",fontSize:"14px",padding:"8px 12px",cursor:"pointer",lineHeight:1 }}>⚙️</button>
+          <button onClick={()=>newSession()} style={{ background:"#1a1a1a",border:"1px solid #333",borderRadius:"6px",color:"#c8a87a",fontFamily:"inherit",fontSize:"12px",padding:"8px 14px",cursor:"pointer" }}>⚄ New Session</button>
+        </div>
       </div>
 
-      {/* Settings */}
+      {/* Progressions */}
       <div style={{ display:"flex",gap:"8px",flexWrap:"wrap",marginBottom:"14px",background:"#141414",border:"1px solid #222",borderRadius:"8px",padding:"10px 12px",alignItems:"center" }}>
-        <span style={{ fontSize:"10px",color:"#555",letterSpacing:"2px",textTransform:"uppercase",marginRight:"4px" }}>Settings</span>
-        <button onClick={()=>setLeftHanded(v=>!v)} style={{ background:leftHanded?"#2a3a5a":"#1a1a1a",border:`1px solid ${leftHanded?"#4a6aaa":"#333"}`,borderRadius:"6px",color:leftHanded?"#7ab8ff":"#666",fontFamily:"inherit",fontSize:"11px",padding:"6px 12px",cursor:"pointer" }}>
-          🤚 Left-Handed {leftHanded?"ON":"OFF"}
-        </button>
-        <button onClick={()=>{ const next=!use7ths; setUse7ths(next); newSession(next,selectedProgs); }} style={{ background:use7ths?"#b87333":"#1a1a1a",border:`1px solid ${use7ths?"#e8a84a":"#333"}`,borderRadius:"6px",color:use7ths?"#fff":"#666",fontFamily:"inherit",fontSize:"11px",padding:"6px 12px",cursor:"pointer" }}>
-          7th Chords {use7ths?"ON":"OFF"}
-        </button>
-        <button onClick={()=>setKeepAwake(v=>!v)} style={{ background:keepAwake?"#2a3a5a":"#1a1a1a",border:`1px solid ${keepAwake?"#4a6aaa":"#333"}`,borderRadius:"6px",color:keepAwake?"#7ab8ff":"#666",fontFamily:"inherit",fontSize:"11px",padding:"6px 12px",cursor:"pointer" }}>
-          ☀️ Keep Screen Awake {keepAwake?"ON":"OFF"}
-        </button>
-        {/* Per-block progression selectors */}
-        <div style={{ display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:"6px",width:"100%",marginTop:"8px" }}>
+        <span style={{ fontSize:"10px",color:"#555",letterSpacing:"2px",textTransform:"uppercase",marginRight:"4px" }}>Progressions</span>
+        <div style={{ display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:"6px",width:"100%" }}>
           {BLOCK_LABELS.map((label,bi)=>(
             <div key={bi}>
               <div style={{ fontSize:"9px",color:BLOCK_ACCENT[bi],letterSpacing:"2px",textTransform:"uppercase",marginBottom:"4px" }}>{label}</div>
@@ -569,6 +572,75 @@ export default function GuitarPracticeSession() {
           ))}
         </div>
       </div>
+
+      {/* Settings modal */}
+      {settingsOpen && (
+        <div onClick={()=>setSettingsOpen(false)} style={{ position:"fixed",inset:0,background:"rgba(0,0,0,0.65)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:100,padding:"16px" }}>
+          <div onClick={e=>e.stopPropagation()} style={{ background:"#141414",border:"1px solid #333",borderRadius:"10px",padding:"18px",width:"100%",maxWidth:"340px" }}>
+            <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"14px" }}>
+              <span style={{ fontSize:"11px",color:"#888",letterSpacing:"2px",textTransform:"uppercase" }}>Settings</span>
+              <button onClick={()=>setSettingsOpen(false)} aria-label="Close settings" style={{ background:"none",border:"none",color:"#666",fontSize:"18px",cursor:"pointer",lineHeight:1,padding:"4px" }}>✕</button>
+            </div>
+            <div style={{ display:"flex",flexDirection:"column",gap:"8px" }}>
+              <button onClick={()=>setLeftHanded(v=>!v)} style={{ textAlign:"left",background:leftHanded?"#2a3a5a":"#1a1a1a",border:`1px solid ${leftHanded?"#4a6aaa":"#333"}`,borderRadius:"6px",color:leftHanded?"#7ab8ff":"#666",fontFamily:"inherit",fontSize:"12px",padding:"10px 12px",cursor:"pointer" }}>
+                🤚 Left-Handed {leftHanded?"ON":"OFF"}
+              </button>
+              <button onClick={()=>{ const next=!use7ths; setUse7ths(next); newSession(next,selectedProgs); }} style={{ textAlign:"left",background:use7ths?"#b87333":"#1a1a1a",border:`1px solid ${use7ths?"#e8a84a":"#333"}`,borderRadius:"6px",color:use7ths?"#fff":"#666",fontFamily:"inherit",fontSize:"12px",padding:"10px 12px",cursor:"pointer" }}>
+                7th Chords {use7ths?"ON":"OFF"}
+              </button>
+              <button onClick={()=>setKeepAwake(v=>!v)} style={{ textAlign:"left",background:keepAwake?"#2a3a5a":"#1a1a1a",border:`1px solid ${keepAwake?"#4a6aaa":"#333"}`,borderRadius:"6px",color:keepAwake?"#7ab8ff":"#666",fontFamily:"inherit",fontSize:"12px",padding:"10px 12px",cursor:"pointer" }}>
+                ☀️ Keep Screen Awake {keepAwake?"ON":"OFF"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Help modal */}
+      {helpOpen && (
+        <div onClick={()=>setHelpOpen(false)} style={{ position:"fixed",inset:0,background:"rgba(0,0,0,0.65)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:100,padding:"16px" }}>
+          <div onClick={e=>e.stopPropagation()} style={{ background:"#141414",border:"1px solid #333",borderRadius:"10px",padding:"18px",width:"100%",maxWidth:"460px",maxHeight:"80vh",overflowY:"auto" }}>
+            <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"14px" }}>
+              <span style={{ fontSize:"11px",color:"#888",letterSpacing:"2px",textTransform:"uppercase" }}>How WoodShed Works</span>
+              <button onClick={()=>setHelpOpen(false)} aria-label="Close help" style={{ background:"none",border:"none",color:"#666",fontSize:"18px",cursor:"pointer",lineHeight:1,padding:"4px" }}>✕</button>
+            </div>
+            <div style={{ display:"flex",flexDirection:"column",gap:"16px",fontSize:"12px",color:"#aaa",lineHeight:1.5 }}>
+              <div>
+                <div style={{ fontSize:"11px",color:"#c8a87a",fontWeight:700,marginBottom:"4px" }}>A Session</div>
+                <div>Every session has four blocks — <b style={{color:"#e8e4dc"}}>Major Key</b>, <b style={{color:"#e8e4dc"}}>Minor Key</b>, <b style={{color:"#e8e4dc"}}>Mode 1</b>, and <b style={{color:"#e8e4dc"}}>Mode 2</b> — each assigned a random key, scale, and chord progression. Tap ⚄ New Session to reroll all four. Tap a block in the row of tiles below the header to jump straight to it.</div>
+              </div>
+              <div>
+                <div style={{ fontSize:"11px",color:"#c8a87a",fontWeight:700,marginBottom:"4px" }}>Working a Block</div>
+                <div>Each block runs through two stages: <b style={{color:"#e8e4dc"}}>Scale Walk</b> shows the scale's notes and a fretboard diagram to learn the shape first; <b style={{color:"#e8e4dc"}}>Chord Practice</b> then steps through the block's progression in five voicing styles — 6th/5th/4th Anchor (positional shapes built off a bass string), Open, and Power — via the tabs above the fretboard. Use ← Back / Next → to move through steps, or jump directly to a voicing tab.</div>
+              </div>
+              <div>
+                <div style={{ fontSize:"11px",color:"#c8a87a",fontWeight:700,marginBottom:"4px" }}>Playing Along</div>
+                <div>During Chord Practice, pick a strumming/picking <b style={{color:"#e8e4dc"}}>Technique</b>, then hit ▶ Play Along — the rhythm strip highlights each step in time with a metronome click. Drag the BPM slider to change tempo.</div>
+              </div>
+              <div>
+                <div style={{ fontSize:"11px",color:"#c8a87a",fontWeight:700,marginBottom:"4px" }}>Theory Tab</div>
+                <div>Tap 🎸 Theory to see a chord-tone breakdown of the current block's progression — root, quality, and voicing for each chord.</div>
+              </div>
+              <div>
+                <div style={{ fontSize:"11px",color:"#c8a87a",fontWeight:700,marginBottom:"4px" }}>Progressions</div>
+                <div>Pin any block to a specific chord progression instead of a random one using the dropdowns in the Progressions panel.</div>
+              </div>
+              <div>
+                <div style={{ fontSize:"11px",color:"#c8a87a",fontWeight:700,marginBottom:"4px" }}>Settings (⚙️)</div>
+                <div>
+                  <div>🤚 <b style={{color:"#e8e4dc"}}>Left-Handed</b> — mirrors every fretboard and chord diagram.</div>
+                  <div>7th Chords — swaps triads for 7th-chord voicings throughout.</div>
+                  <div>☀️ <b style={{color:"#e8e4dc"}}>Keep Screen Awake</b> — stops your device from locking mid-practice.</div>
+                </div>
+              </div>
+              <div>
+                <div style={{ fontSize:"11px",color:"#c8a87a",fontWeight:700,marginBottom:"4px" }}>Installing on iPhone</div>
+                <div>In Safari, tap Share → Add to Home Screen. WoodShed installs as a full-screen app and works fully offline.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Session Map */}
       <div style={{ display:"grid",gridTemplateColumns:"repeat(4,1fr) auto",gap:"6px",marginBottom:"14px" }}>
