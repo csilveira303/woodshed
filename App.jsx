@@ -380,6 +380,7 @@ function ChordTheoryBlock({ session, leftHanded }) {
 export default function GuitarPracticeSession() {
   const [use7ths,       setUse7ths]       = useState(true);
   const [leftHanded,    setLeftHanded]    = useState(true);
+  const [keepAwake,     setKeepAwake]     = useState(true);
   const [selectedProgs, setSelectedProgs] = useState(["Random","Random","Random","Random"]);
   const [activeTab,     setActiveTab]     = useState("practice");
   const [session,       setSession]       = useState(null);
@@ -395,8 +396,9 @@ export default function GuitarPracticeSession() {
     schedulerRef.current = createClickScheduler({ onStep: setActiveStep });
   }
 
-  // ── Keep-awake (Screen Wake Lock) — on by default, best-effort ─────────────
+  // ── Keep-awake (Screen Wake Lock) — user-toggleable, on by default, best-effort ─
   useEffect(() => {
+    if (!keepAwake) return;
     async function acquireWakeLock() {
       if (!("wakeLock" in navigator)) return;
       try {
@@ -413,7 +415,7 @@ export default function GuitarPracticeSession() {
       document.removeEventListener("visibilitychange", onVisibilityChange);
       if (wakeLockRef.current) { wakeLockRef.current.release(); wakeLockRef.current = null; }
     };
-  }, []);
+  }, [keepAwake]);
 
   function newSession(u7=use7ths, progs=selectedProgs) {
     stopPlayback();
@@ -550,6 +552,9 @@ export default function GuitarPracticeSession() {
         </button>
         <button onClick={()=>{ const next=!use7ths; setUse7ths(next); newSession(next,selectedProgs); }} style={{ background:use7ths?"#b87333":"#1a1a1a",border:`1px solid ${use7ths?"#e8a84a":"#333"}`,borderRadius:"6px",color:use7ths?"#fff":"#666",fontFamily:"inherit",fontSize:"11px",padding:"6px 12px",cursor:"pointer" }}>
           7th Chords {use7ths?"ON":"OFF"}
+        </button>
+        <button onClick={()=>setKeepAwake(v=>!v)} style={{ background:keepAwake?"#2a3a5a":"#1a1a1a",border:`1px solid ${keepAwake?"#4a6aaa":"#333"}`,borderRadius:"6px",color:keepAwake?"#7ab8ff":"#666",fontFamily:"inherit",fontSize:"11px",padding:"6px 12px",cursor:"pointer" }}>
+          ☀️ Keep Screen Awake {keepAwake?"ON":"OFF"}
         </button>
         {/* Per-block progression selectors */}
         <div style={{ display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:"6px",width:"100%",marginTop:"8px" }}>
