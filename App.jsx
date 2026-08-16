@@ -619,7 +619,7 @@ export default function GuitarPracticeSession() {
               </div>
               <div>
                 <div style={{ fontSize:"11px",color:"#c8a87a",fontWeight:700,marginBottom:"4px" }}>Theory Tab</div>
-                <div>Tap 🎸 Theory to see a chord-tone breakdown of the current block's progression — root, quality, and voicing for each chord.</div>
+                <div>Tap 🎸 Theory to explore any chord on its own — pick a Root and Chord Type (roots from your current session are marked ★) and a voicing style (6th string / 5th string / Open chord) to see its interval breakdown, diagram, and string-by-string notes. Tap ⚄ Random for a random chord. This is a standalone reference, independent of the active block's progression.</div>
               </div>
               <div>
                 <div style={{ fontSize:"11px",color:"#c8a87a",fontWeight:700,marginBottom:"4px" }}>Progressions</div>
