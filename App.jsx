@@ -551,9 +551,9 @@ export default function GuitarPracticeSession() {
           <h1 style={{ margin:0,fontSize:"clamp(18px,3.5vw,26px)",fontWeight:700,color:"#f0ebe0",letterSpacing:"-0.5px" }}>WoodShed</h1>
         </div>
         <div style={{ display:"flex",gap:"8px" }}>
-          <button onClick={()=>setHelpOpen(true)} aria-label="Help" style={{ background:"#1a1a1a",border:"1px solid #333",borderRadius:"6px",color:"#c8a87a",fontFamily:"inherit",fontSize:"14px",padding:"8px 12px",cursor:"pointer",lineHeight:1 }}>❓</button>
-          <button onClick={()=>setSettingsOpen(true)} aria-label="Settings" style={{ background:"#1a1a1a",border:"1px solid #333",borderRadius:"6px",color:"#c8a87a",fontFamily:"inherit",fontSize:"14px",padding:"8px 12px",cursor:"pointer",lineHeight:1 }}>⚙️</button>
           <button onClick={()=>newSession()} style={{ background:"#1a1a1a",border:"1px solid #333",borderRadius:"6px",color:"#c8a87a",fontFamily:"inherit",fontSize:"12px",padding:"8px 14px",cursor:"pointer" }}>⚄ New Session</button>
+          <button onClick={()=>setSettingsOpen(true)} aria-label="Settings" style={{ background:"#1a1a1a",border:"1px solid #333",borderRadius:"6px",color:"#c8a87a",fontFamily:"inherit",fontSize:"14px",padding:"8px 12px",cursor:"pointer",lineHeight:1 }}>⚙️</button>
+          <button onClick={()=>setHelpOpen(true)} aria-label="Help" style={{ background:"#1a1a1a",border:"1px solid #333",borderRadius:"6px",color:"#c8a87a",fontFamily:"inherit",fontSize:"14px",padding:"8px 12px",cursor:"pointer",lineHeight:1 }}>❓</button>
         </div>
       </div>
 
