@@ -380,22 +380,35 @@ export function buildTheoryVoicing(rootName, chordType, voicingType) {
     const strNum = voicingType === "6th string" ? 6 : 5;
     baseFret = strNum === 6 ? fretFor6th(rootName) : fretFor5th(rootName);
 
-    // Find nearest chord tone on each string within window [baseFret-1, baseFret+4]
+    // Find the nearest chord tone on each string within window [baseFret-1, baseFret+4].
+    // Prefer a chord tone not already shown on another string first, then nearest fret —
+    // otherwise dense chords (9ths/11ths/13ths, which cover many of the 12 pitch classes)
+    // find a valid tone at offset 0 on almost every string and collapse into a flat barre
+    // that repeats the same 1-2 intervals instead of showing the chord's actual voicing.
     shape = [null, null, null, null, null, null]; // [str6…str1]
+    const usedSemitones = new Set();
     for (let si = 0; si < 6; si++) {
       const sn   = 6 - si; // si=0→str6, si=5→str1
       const open = STRING_OPEN_NOTE[sn];
-      let best = null, bestDist = 999;
+      let best = null, bestDist = 999, bestIsNew = false;
       for (let offset = -1; offset <= 4; offset++) {
         const fret = baseFret + offset;
         if (fret < 0) continue;
         const sem = ((open + fret) - rootIdx + 144) % 12;
-        if (chordSet.has(sem) && Math.abs(offset) < bestDist) {
-          bestDist = Math.abs(offset);
-          best     = offset;
+        if (!chordSet.has(sem)) continue;
+        const isNew = !usedSemitones.has(sem);
+        const dist  = Math.abs(offset);
+        if (best === null || (isNew && !bestIsNew) || (isNew === bestIsNew && dist < bestDist)) {
+          bestDist  = dist;
+          best      = offset;
+          bestIsNew = isNew;
         }
       }
       shape[si] = best;
+      if (best !== null) {
+        const fret = baseFret + best;
+        usedSemitones.add(((open + fret) - rootIdx + 144) % 12);
+      }
     }
     mutedStrings = shape.map((v,i) => v === null ? i : -1).filter(i => i >= 0);
   }

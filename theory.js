@@ -319,7 +319,7 @@ export const THEORY_CHORD_TYPES = [
   // 13th
   { label:"Ma13",      quality:"maj13",   intervals:[0,4,7,11,2,9],   formula:"1-3-5-7-9-13" },
   { label:"Dom13",     quality:"13",      intervals:[0,4,7,10,2,9],   formula:"1-3-5-b7-9-13" },
-  { label:"Mi13",      quality:"m13",     intervals:[0,3,7,10,2,5],   formula:"1-b3-5-b7-9-11" },
+  { label:"Mi13",      quality:"m13",     intervals:[0,3,7,10,2,9],   formula:"1-b3-5-b7-9-13" },
   // #11
   { label:"Ma9#11",    quality:"maj9#11", intervals:[0,4,7,11,2,6],   formula:"1-3-5-7-9-#11" },
   { label:"Dom9#11",   quality:"9#11",    intervals:[0,4,7,10,2,6],   formula:"1-3-5-b7-9-#11" },
