@@ -3,7 +3,7 @@
 // 4-block practice session structure (Major, Minor, Mode1, Mode2).
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { RANDOM_MODES, progressionsFor, buildScale, buildProgressionChords, rootNameForPitchClass } from "./theory.js";
+import { RANDOM_MODES, progressionsFor, buildScale, buildProgressionChords, rootNameForPitchClass, scaleNameForProgression } from "./theory.js";
 import { buildPositionalVoicings, openVoicing, powerVoicing, fourthStringVoicing } from "./fretboard.js";
 
 // ─── Techniques ───────────────────────────────────────────────────────────────
@@ -222,15 +222,22 @@ export function buildSession(use7ths, progsOverride) {
   const minorKeyPC = pickRandom(allKeys, [majorKeyPC]);
   const majorKey   = rootNameForMode(majorKeyPC, "Major (Ionian)");
   const minorKey   = rootNameForMode(minorKeyPC, "Minor (Aeolian)");
-  const mode1      = pickRandom(RANDOM_MODES);
-  const mode2      = pickRandom(RANDOM_MODES, [mode1]);
+
+  // A pinned (non-Random) progression for Mode 1/2 belongs to one specific
+  // mode — use that mode for the block instead of re-randomizing it, or the
+  // block could land on a different mode than the progression it's showing.
+  const pinnedMode1 = progsOverride?.[2] && progsOverride[2] !== "Random" ? scaleNameForProgression(progsOverride[2]) : null;
+  const pinnedMode2 = progsOverride?.[3] && progsOverride[3] !== "Random" ? scaleNameForProgression(progsOverride[3]) : null;
+
+  const mode1      = pinnedMode1 || pickRandom(RANDOM_MODES);
+  const mode2      = pinnedMode2 || pickRandom(RANDOM_MODES, [mode1]);
   const mode1Key   = rootNameForMode(pickRandom(allKeys), mode1);
   const mode2Key   = rootNameForMode(pickRandom(allKeys), mode2);
 
   const scaleNames = ["Major (Ionian)", "Minor (Aeolian)", mode1, mode2];
   const progNames  = (progsOverride || ["Random","Random","Random","Random"]).map((p, bi) =>
     (!p || p === "Random")
-      ? pickRandom(Object.keys(progressionsFor(scaleNames[bi])))
+      ? pickRandom(progressionsFor(scaleNames[bi]).map(p => p.name))
       : p
   );
 

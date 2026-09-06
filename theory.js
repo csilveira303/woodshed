@@ -147,102 +147,104 @@ export function seventhSuffix(degreeIdx, scaleName) {
 }
 
 // ─── Progressions ─────────────────────────────────────────────────────────────
-// Degree indices (0-based) into the scale. Each mode gets its own curated list
-// of progressions actually used in real playing for that mode's characteristic
-// sound — not borrowed wholesale from a generic major/minor pool — so the
-// random picker never lands on something that doesn't represent the mode.
-// Roman numeral case matches that mode's own triadSuffix() qualities exactly.
+// Each mode's list is curated for that mode's own characteristic sound — not
+// borrowed wholesale from a generic major/minor pool — so the random picker
+// never lands on something that doesn't represent the mode.
+//
+// Chords are stored as roman numeral + semitone offset (from the block's
+// root) + quality suffix, rather than pure diatonic scale degree, because
+// several signature modal progressions intentionally borrow a chromatic
+// quality for their characteristic color — e.g. Phrygian's Spanish/Andalusian
+// cadence plays its bVII as major even though it's minor in strict natural
+// Phrygian, and Mixolydian's heavier rock vamps borrow a bVI from the
+// parallel minor. Quality suffixes match triadSuffix()/seventhSuffix() exactly
+// so voicings and the 7th-chords toggle stay compatible.
 
-export const MAJOR_PROGRESSIONS = {
-  "I – IV – V":        [0,3,4],
-  "I – V – vi – IV":   [0,4,5,3],
-  "I – IV – vi – V":   [0,3,5,4],
-  "I – vi – IV – V":   [0,5,3,4],
-  "ii – V – I":        [1,4,0],
-  "I – iii – IV – V":  [0,2,3,4],
-  "I – IV – ii – V":   [0,3,1,4],
-  "vi – IV – I – V":   [5,3,0,4],
-};
+const ROMAN_DEGREE = { I:1, II:2, III:3, IV:4, V:5, VI:6, VII:7 };
 
-export const MINOR_PROGRESSIONS = {
-  "i – iv – v":         [0,3,4],
-  "i – VI – III – VII": [0,5,2,6],
-  "i – VII – VI – VII": [0,6,5,6],
-  "i – iv – VII – III": [0,3,6,2],
-  "i – v – VI – VII":   [0,4,5,6],
-  "ii° – v – i":        [1,4,0],
-  "i – VI – VII – i":   [0,5,6,0],
-  "i – III – VII – VI": [0,2,6,5],
-};
+/** Extracts the base scale-degree number (1-7) from a roman numeral, ignoring
+ *  any leading accidental (b/#) and trailing quality mark (°, m7, maj7...). */
+function romanDegreeNumber(roman) {
+  const m = /^[b#]*([ivIV]+)/.exec(roman);
+  return ROMAN_DEGREE[(m ? m[1] : "I").toUpperCase()] || 1;
+}
 
-// Dorian's signature is the major IV over a minor i (the classic modal vamp
-// heard in "So What", "Oye Como Va", "Riders on the Storm"). vi° (diminished)
-// is skipped — too unstable for a strummed vamp.
-export const DORIAN_PROGRESSIONS = {
-  "i – IV – i":       [0,3,0],
-  "i – VII – IV":     [0,6,3],
-  "i – IV – VII":     [0,3,6],
-  "i – ii – IV":      [0,1,3],
-  "i – v – IV":       [0,4,3],
-  "i – IV – v – i":   [0,3,4,0],
-  "i – III – VII":    [0,2,6],
-  "ii – IV – i":      [1,3,0],
-};
+/** Diatonic degree index (0-6) for a semitone within a mode, or -1 if the
+ *  chord isn't a note of that mode's scale (a chromatic borrowing). */
+function diatonicDegreeIndex(scaleName, semitone) {
+  return (SCALE_INTERVALS[scaleName] || SCALE_INTERVALS["Major (Ionian)"]).indexOf(semitone);
+}
 
-// Phrygian's signature is the major II a half-step above the tonic (the
-// flamenco/metal "flat 2" color). v° is skipped — too unstable to vamp on.
-export const PHRYGIAN_PROGRESSIONS = {
-  "i – II – i":        [0,1,0],
-  "i – VI – vii":      [0,5,6],
-  "i – II – III":      [0,1,2],
-  "i – iv – i":        [0,3,0],
-  "i – VI – II – i":   [0,5,1,0],
-  "III – II – i":      [2,1,0],
-  "i – vii – VI":      [0,6,5],
-  "i – II – vii – i":  [0,1,6,0],
-};
+/** Upgrades a progression chord's triad quality to a 7th-chord quality for the
+ *  7ths toggle. Uses the mode's own diatonic 7th quality when the chord is
+ *  naturally diatonic (its given quality matches triadSuffix exactly);
+ *  otherwise upgrades the given triad quality directly, since the chord's
+ *  color there is a deliberate chromatic borrowing that seventhSuffix's
+ *  diatonic table doesn't know about. */
+function seventhQualityFor(scaleName, semitone, quality) {
+  const degreeIdx = diatonicDegreeIndex(scaleName, semitone);
+  if (degreeIdx !== -1 && triadSuffix(degreeIdx, scaleName) === quality) {
+    return seventhSuffix(degreeIdx, scaleName);
+  }
+  if (quality === "") return "maj7";
+  if (quality === "m") return "m7";
+  if (quality === "°") return "m7b5";
+  return quality; // already an extended quality (maj7, m7, ...) — leave as-is
+}
 
-// Lydian's signature is the major II (from the raised 4th) giving a bright,
-// floaty I–II color. iv° (diminished, built on the raised 4th itself) and the
-// minor vii are skipped — neither is used in a typical Lydian vamp.
-export const LYDIAN_PROGRESSIONS = {
-  "I – II – I":       [0,1,0],
-  "I – II – V":       [0,1,4],
-  "I – V – II – I":   [0,4,1,0],
-  "I – vi – II":      [0,5,1],
-  "I – iii – II":     [0,2,1],
-  "I – II – vi – V":  [0,1,5,4],
-  "vi – II – I":      [5,1,0],
-};
+export const IONIAN_PROGRESSIONS = [
+  { name:"Classic Major",    romans:["I","IV","V"],                            semitones:[0,5,7],            qualities:["","",""],                    difficulty:"beginner",     feel:"The foundation of Western music — bright and resolved" },
+  { name:"Pop Ballad",       romans:["I","V","vi","IV"],                       semitones:[0,7,9,5],          qualities:["","","m",""],                difficulty:"beginner",     feel:"Ubiquitous in pop — emotional but uplifting" },
+  { name:"50s Progression",  romans:["I","vi","IV","V"],                       semitones:[0,9,5,7],          qualities:["","m","",""],                difficulty:"beginner",     feel:"Doo-wop, early rock and roll — nostalgic and warm" },
+  { name:"ii–V–I",           romans:["ii","V","I"],                            semitones:[2,7,0],            qualities:["m","",""],                   difficulty:"intermediate", feel:"Jazz staple — strong sense of resolution" },
+  { name:"Circle of Fifths", romans:["I","IV","vii°","iii","vi","ii","V","I"], semitones:[0,5,11,4,9,2,7,0], qualities:["","","°","m","m","m","",""], difficulty:"advanced",     feel:"Full diatonic circle — builds harmonic vocabulary" },
+];
 
-// Mixolydian's signature is the major bVII (THE classic rock/blues dominant
-// vamp: I–bVII–IV). iii° is skipped — too unstable to vamp on.
-export const MIXOLYDIAN_PROGRESSIONS = {
-  "I – VII – IV":       [0,6,3],
-  "I – IV – VII – I":   [0,3,6,0],
-  "I – v – IV":         [0,4,3],
-  "I – ii – IV":        [0,1,3],
-  "I – VII – IV – VII": [0,6,3,6],
-  "I – IV – v – VII":   [0,3,4,6],
-  "vi – IV – I – VII":  [5,3,0,6],
-  "I – VII – I":        [0,6,0],
-};
+export const DORIAN_PROGRESSIONS = [
+  { name:"Dorian Vamp",       romans:["i","IV"],             semitones:[0,5],      qualities:["m",""],         difficulty:"beginner",     feel:"The signature Dorian sound — minor i against major IV" },
+  { name:"Soul Groove",       romans:["i","IV","i","IV"],    semitones:[0,5,0,5],  qualities:["m","","m",""],  difficulty:"beginner",     feel:"Repeated i–IV vamp — Santana, Herbie Hancock territory" },
+  { name:"Dorian Turnaround", romans:["i","ii","IV","i"],    semitones:[0,2,5,0],  qualities:["m","m","","m"], difficulty:"intermediate", feel:"Uses the major II — highlights the Dorian flavor" },
+  { name:"Modal Jazz",        romans:["i","IV","VII","III"], semitones:[0,5,10,3], qualities:["m","","",""],   difficulty:"advanced",     feel:"So What style — floating, no strong resolution" },
+];
 
-// Locrian's tonic itself is diminished, so it's rarely used as a true "home"
-// vamp — these lean on its other diatonic chords, with i° appearing only as
-// a color/cadence point rather than something to rest on.
-export const LOCRIAN_PROGRESSIONS = {
-  "II – V – i°":    [1,4,0],
-  "iv – V – II":    [3,4,1],
-  "VI – vii – i°":  [5,6,0],
-  "II – iii – iv":  [1,2,3],
-  "iv – II – V":    [3,1,4],
-  "VI – iv – II":   [5,3,1],
-};
+export const PHRYGIAN_PROGRESSIONS = [
+  { name:"Phrygian Vamp",     romans:["i","bII"],              semitones:[0,1],      qualities:["m",""],       difficulty:"beginner",     feel:"The essential Phrygian sound — flamenco, metal" },
+  { name:"Spanish Cadence",   romans:["i","bVII","bVI","bII"], semitones:[0,10,8,1], qualities:["m","","",""], difficulty:"intermediate", feel:"Andalusian descent — flamenco and classical Spanish" },
+  { name:"Metal Riff",        romans:["i","bII","bVII","i"],   semitones:[0,1,10,0], qualities:["m","","","m"],difficulty:"intermediate", feel:"Heavy and dark — common in metal and film scores" },
+  { name:"Phrygian Dominant", romans:["I","bII","i","bII"],    semitones:[0,1,0,1],  qualities:["","","m",""], difficulty:"advanced",     feel:"Major I against bII — Middle Eastern, exotic color" },
+];
+
+export const LYDIAN_PROGRESSIONS = [
+  { name:"Lydian Float",    romans:["I","II"],                          semitones:[0,2],      qualities:["",""],                     difficulty:"beginner",     feel:"The Lydian signature — major I to major II, dreamy lift" },
+  { name:"Film Score",      romans:["I","II","vii","I"],                semitones:[0,2,11,0], qualities:["","","m",""],              difficulty:"intermediate", feel:"Cinematic and expansive — John Williams territory" },
+  { name:"Lydian Drift",    romans:["I","II","IV","I"],                 semitones:[0,2,6,0],  qualities:["","","°",""],              difficulty:"intermediate", feel:"Uses the #IV diminished — otherworldly and unresolved" },
+  { name:"Neo-Soul Lydian", romans:["Imaj7","IImaj7","vii m7","Imaj7"], semitones:[0,2,11,0], qualities:["maj7","maj7","m7","maj7"], difficulty:"advanced",     feel:"Extended chords over Lydian — lush and sophisticated" },
+];
+
+export const MIXOLYDIAN_PROGRESSIONS = [
+  { name:"Rock Vamp",         romans:["I","bVII"],              semitones:[0,10],      qualities:["",""],       difficulty:"beginner",     feel:"The rock and blues staple — Sweet Home Alabama, La Grange" },
+  { name:"Southern Rock",     romans:["I","bVII","IV","I"],     semitones:[0,10,5,0],  qualities:["","","",""], difficulty:"beginner",     feel:"Classic southern rock — all major chords, bluesy feel" },
+  { name:"Mixolydian Groove", romans:["I","IV","bVII","IV"],    semitones:[0,5,10,5],  qualities:["","","",""], difficulty:"intermediate", feel:"Rotating around bVII — funky and hypnotic" },
+  { name:"Modal Rock",        romans:["I","bVII","bVI","bVII"], semitones:[0,10,8,10], qualities:["","","",""], difficulty:"intermediate", feel:"Adds the bVI — heavier, more dramatic color" },
+];
+
+export const AEOLIAN_PROGRESSIONS = [
+  { name:"Natural Minor",    romans:["i","iv","v"],         semitones:[0,5,7],    qualities:["m","m","m"],   difficulty:"beginner",     feel:"Pure natural minor — dark and unresolved" },
+  { name:"Minor Ballad",     romans:["i","VI","III","VII"], semitones:[0,8,3,10], qualities:["m","","",""],  difficulty:"beginner",     feel:"Emotional and cinematic — Stairway, Nothing Else Matters" },
+  { name:"Andalusian",       romans:["i","VII","VI","v"],   semitones:[0,10,8,7], qualities:["m","","","m"], difficulty:"intermediate", feel:"Descending bass line — dramatic and classical" },
+  { name:"Minor Turnaround", romans:["i","VI","VII","i"],   semitones:[0,8,10,0], qualities:["m","","","m"], difficulty:"intermediate", feel:"Circular and hypnotic — common in rock and pop" },
+  { name:"ii°–v–i",          romans:["ii°","v","i"],        semitones:[2,7,0],    qualities:["°","m","m"],   difficulty:"advanced",     feel:"Natural minor ii–V–i — darker than harmonic minor version" },
+];
+
+export const LOCRIAN_PROGRESSIONS = [
+  { name:"Locrian Vamp",    romans:["i°","bII"],              semitones:[0,1],      qualities:["°",""],        difficulty:"intermediate", feel:"Tense and unstable — the diminished i resolves nowhere" },
+  { name:"Half-Diminished", romans:["i°","bVII","bVI","bII"], semitones:[0,10,8,1], qualities:["°","m","",""], difficulty:"intermediate", feel:"Used in jazz over m7b5 chords — dark and sophisticated" },
+  { name:"Metal Locrian",   romans:["i°","bII","bV","bII"],   semitones:[0,1,6,1],  qualities:["°","","",""],  difficulty:"advanced",     feel:"Extreme dissonance — tritone relationships, avant-garde metal" },
+];
 
 const PROGRESSIONS_BY_SCALE = {
-  "Major (Ionian)":  MAJOR_PROGRESSIONS,
-  "Minor (Aeolian)": MINOR_PROGRESSIONS,
+  "Major (Ionian)":  IONIAN_PROGRESSIONS,
+  "Minor (Aeolian)": AEOLIAN_PROGRESSIONS,
   "Dorian":          DORIAN_PROGRESSIONS,
   "Phrygian":        PHRYGIAN_PROGRESSIONS,
   "Lydian":          LYDIAN_PROGRESSIONS,
@@ -250,19 +252,34 @@ const PROGRESSIONS_BY_SCALE = {
   "Locrian":         LOCRIAN_PROGRESSIONS,
 };
 
-// Combined lookup — all keys must be unique across all tables above.
-export const ALL_PROGRESSIONS = Object.assign({}, ...Object.values(PROGRESSIONS_BY_SCALE));
+// Flat lookup by name — every progression name must be unique across all modes.
+// Each entry is tagged with its home scaleName so a block that's pinned to a
+// specific progression can also be pinned to that progression's mode (see
+// scaleNameForProgression below) instead of landing on a random, mismatched one.
+const ALL_PROGRESSIONS = {};
+for (const [scaleName, list] of Object.entries(PROGRESSIONS_BY_SCALE)) {
+  for (const p of list) ALL_PROGRESSIONS[p.name] = { ...p, scaleName };
+}
 
 export function progressionsFor(scaleName) {
-  return PROGRESSIONS_BY_SCALE[scaleName] || MAJOR_PROGRESSIONS;
+  return PROGRESSIONS_BY_SCALE[scaleName] || IONIAN_PROGRESSIONS;
+}
+
+/** The mode a named progression belongs to, or null if the name isn't known. */
+export function scaleNameForProgression(name) {
+  return ALL_PROGRESSIONS[name]?.scaleName ?? null;
 }
 
 export function buildProgressionChords(rootName, scaleName, progressionName, use7ths) {
-  const scale   = buildScale(rootName, scaleName);
-  const degrees = ALL_PROGRESSIONS[progressionName] || [0,3,4];
-  return degrees.map(d => {
-    const quality = use7ths ? seventhSuffix(d, scaleName) : triadSuffix(d, scaleName);
-    return { degree: d, name: scale[d] + quality, root: scale[d], quality };
+  const progression = ALL_PROGRESSIONS[progressionName] || IONIAN_PROGRESSIONS[0];
+  return progression.romans.map((roman, i) => {
+    const semitone  = progression.semitones[i];
+    const degreeNum = romanDegreeNumber(roman);
+    const quality   = use7ths
+      ? seventhQualityFor(scaleName, semitone, progression.qualities[i])
+      : progression.qualities[i];
+    const root = spellChordTone(rootName, semitone, String(degreeNum));
+    return { degree: degreeNum - 1, name: root + quality, root, quality };
   });
 }
 

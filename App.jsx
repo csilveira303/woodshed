@@ -530,6 +530,7 @@ export default function GuitarPracticeSession() {
   // Mode 1 / Mode 2 blocks show the scale walk in their parent major shape.
   const isModeBlock   = activeBlock===2 || activeBlock===3;
   const modeParentRoot = isModeBlock ? parentMajor(block.rootKey, block.scaleName) : null;
+  const progMeta = progressionsFor(block.scaleName).find(p => p.name === block.progressionName);
 
   const voicingTabLabels = block.use7ths
     ? ["Scale Walk","6th Anchor","5th Anchor","4th Anchor"]
@@ -566,7 +567,7 @@ export default function GuitarPracticeSession() {
               <div style={{ fontSize:"9px",color:BLOCK_ACCENT[bi],letterSpacing:"2px",textTransform:"uppercase",marginBottom:"4px" }}>{label}</div>
               <select value={selectedProgs[bi]} onChange={e=>{ const next=[...selectedProgs]; next[bi]=e.target.value; setSelectedProgs(next); if(session) newSession(use7ths,next); }} style={{ width:"100%",background:"#1a1a1a",color:"#c8a87a",border:`1px solid ${BLOCK_COLORS[bi]}`,borderRadius:"5px",fontFamily:"inherit",fontSize:"10px",padding:"5px 6px",cursor:"pointer" }}>
                 <option value="Random">Random</option>
-                {Object.keys(progressionsFor(session?.blocks[bi]?.scaleName||"Major (Ionian)")).map(p=><option key={p} value={p}>{p}</option>)}
+                {progressionsFor(session?.blocks[bi]?.scaleName||"Major (Ionian)").map(p=><option key={p.name} value={p.name} title={`${p.feel} (${p.difficulty})`}>{p.name}</option>)}
               </select>
             </div>
           ))}
@@ -683,7 +684,11 @@ export default function GuitarPracticeSession() {
           </div>
         </div>
         <div style={{ fontSize:"11px",color:"#666",textAlign:"right" }}>
-          <div>Progression: <span style={{ color:"#c8a87a" }}>{block.progressionName}</span></div>
+          <div>
+            Progression: <span style={{ color:"#c8a87a" }}>{block.progressionName}</span>
+            {progMeta && <span style={{ color:"#555" }}> ({progMeta.romans.join("–")})</span>}
+          </div>
+          {progMeta && <div style={{ marginTop:"2px",color:"#555",maxWidth:"260px" }}>{progMeta.feel}</div>}
           <div style={{ marginTop:"2px" }}>Step {currentStep} of {totalSteps}</div>
         </div>
       </div>
