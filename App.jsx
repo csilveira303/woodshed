@@ -567,7 +567,7 @@ export default function GuitarPracticeSession() {
               <div style={{ fontSize:"9px",color:BLOCK_ACCENT[bi],letterSpacing:"2px",textTransform:"uppercase",marginBottom:"4px" }}>{label}</div>
               <select value={selectedProgs[bi]} onChange={e=>{ const next=[...selectedProgs]; next[bi]=e.target.value; setSelectedProgs(next); if(session) newSession(use7ths,next); }} style={{ width:"100%",background:"#1a1a1a",color:"#c8a87a",border:`1px solid ${BLOCK_COLORS[bi]}`,borderRadius:"5px",fontFamily:"inherit",fontSize:"10px",padding:"5px 6px",cursor:"pointer" }}>
                 <option value="Random">Random</option>
-                {progressionsFor(session?.blocks[bi]?.scaleName||"Major (Ionian)").map(p=><option key={p.name} value={p.name} title={`${p.feel} (${p.difficulty})`}>{p.name}</option>)}
+                {progressionsFor(session?.blocks[bi]?.scaleName||"Major (Ionian)").map(p=><option key={p.name} value={p.name} title={`${p.feel} (${p.difficulty})`}>{p.romans.join("–")} ({p.name})</option>)}
               </select>
             </div>
           ))}

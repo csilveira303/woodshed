@@ -196,7 +196,7 @@ export const IONIAN_PROGRESSIONS = [
   { name:"Classic Major",    romans:["I","IV","V"],                            semitones:[0,5,7],            qualities:["","",""],                    difficulty:"beginner",     feel:"The foundation of Western music — bright and resolved" },
   { name:"Pop Ballad",       romans:["I","V","vi","IV"],                       semitones:[0,7,9,5],          qualities:["","","m",""],                difficulty:"beginner",     feel:"Ubiquitous in pop — emotional but uplifting" },
   { name:"50s Progression",  romans:["I","vi","IV","V"],                       semitones:[0,9,5,7],          qualities:["","m","",""],                difficulty:"beginner",     feel:"Doo-wop, early rock and roll — nostalgic and warm" },
-  { name:"ii–V–I",           romans:["ii","V","I"],                            semitones:[2,7,0],            qualities:["m","",""],                   difficulty:"intermediate", feel:"Jazz staple — strong sense of resolution" },
+  { name:"Jazz Turnaround",  romans:["ii","V","I"],                            semitones:[2,7,0],            qualities:["m","",""],                   difficulty:"intermediate", feel:"Jazz staple — strong sense of resolution" },
   { name:"Circle of Fifths", romans:["I","IV","vii°","iii","vi","ii","V","I"], semitones:[0,5,11,4,9,2,7,0], qualities:["","","°","m","m","m","",""], difficulty:"advanced",     feel:"Full diatonic circle — builds harmonic vocabulary" },
 ];
 
@@ -233,7 +233,7 @@ export const AEOLIAN_PROGRESSIONS = [
   { name:"Minor Ballad",     romans:["i","VI","III","VII"], semitones:[0,8,3,10], qualities:["m","","",""],  difficulty:"beginner",     feel:"Emotional and cinematic — Stairway, Nothing Else Matters" },
   { name:"Andalusian",       romans:["i","VII","VI","v"],   semitones:[0,10,8,7], qualities:["m","","","m"], difficulty:"intermediate", feel:"Descending bass line — dramatic and classical" },
   { name:"Minor Turnaround", romans:["i","VI","VII","i"],   semitones:[0,8,10,0], qualities:["m","","","m"], difficulty:"intermediate", feel:"Circular and hypnotic — common in rock and pop" },
-  { name:"ii°–v–i",          romans:["ii°","v","i"],        semitones:[2,7,0],    qualities:["°","m","m"],   difficulty:"advanced",     feel:"Natural minor ii–V–i — darker than harmonic minor version" },
+  { name:"Minor Jazz Cadence", romans:["ii°","v","i"],      semitones:[2,7,0],    qualities:["°","m","m"],   difficulty:"advanced",     feel:"Natural minor ii–V–i — darker than harmonic minor version" },
 ];
 
 export const LOCRIAN_PROGRESSIONS = [
