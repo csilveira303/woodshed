@@ -370,8 +370,11 @@ export function buildTheoryVoicing(rootName, chordType, voicingType) {
   let baseFret, shape, mutedStrings;
 
   if (voicingType === "Open chord") {
-    // Use a simplified quality for open chord lookup
-    const simpleQ = quality.includes("m") && !quality.includes("maj") ? "m" : "";
+    // Prefer an exact open shape for this quality (covers 7, maj7, m7, m7b5);
+    // otherwise fall back to the plain major/minor triad shape.
+    const hasExactShape = Object.prototype.hasOwnProperty.call(OPEN_CHORD_DB, rootName + quality);
+    const simpleQ = hasExactShape ? quality
+      : (quality.includes("m") && !quality.includes("maj") ? "m" : "");
     const ov = openVoicing(rootName, simpleQ);
     baseFret = ov.baseFret;
     shape    = ov.shape;
