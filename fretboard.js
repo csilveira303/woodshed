@@ -37,6 +37,7 @@
 import {
   SCALE_INTERVALS, getIntervalName,
   noteNameToPitchClass, buildScale, spellChordTone,
+  triadSuffix, seventhSuffix,
 } from "./theory.js";
 
 // ─── String tuning ────────────────────────────────────────────────────────────
@@ -142,6 +143,35 @@ export function getPositionalScaleNotes(rootName, scaleName) {
   return notes.map((note, deg) => ({
     deg, note, str: strs[deg], fret: frets[deg], isRoot: deg === 0,
   }));
+}
+
+/**
+ * Builds all 7 diatonic chords for a scale (I, ii, iii, IV, V, vi, vii°, or
+ * that scale's own equivalent degrees), each voiced as a movable shape rooted
+ * at the exact string/fret getPositionalScaleNotes places that degree at — so
+ * the whole diatonic ladder sits in the same fixed hand position shown by the
+ * Scale Walk diagram, matching I/ii on the 6th string, iii/IV/V on the 5th,
+ * and vi/vii° on whichever string has room (see note 3 at the top of this file).
+ */
+export function buildScaleChordVoicings(rootName, scaleName, use7ths) {
+  const notes    = buildScale(rootName, scaleName);
+  const posNotes = getPositionalScaleNotes(rootName, scaleName);
+  return posNotes.map(({ deg, str, fret }) => {
+    const quality = use7ths ? seventhSuffix(deg, scaleName) : triadSuffix(deg, scaleName);
+    const shape   = str === 6 ? shapeFor6th(quality) : shapeFor5th(quality);
+    return {
+      degree: deg,
+      root: notes[deg],
+      quality,
+      name: notes[deg] + quality,
+      voicing: {
+        baseFret: fret,
+        shape,
+        mutedStrings: shape.map((v,i) => v === null ? i : -1).filter(i => i >= 0),
+        stringRoot: str,
+      },
+    };
+  });
 }
 
 /** All scale notes on all strings within a fret window (for the background layer). */

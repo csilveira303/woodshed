@@ -3,8 +3,8 @@
 // 4-block practice session structure (Major, Minor, Mode1, Mode2).
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { RANDOM_MODES, progressionsFor, buildScale, buildProgressionChords, rootNameForPitchClass, scaleNameForProgression } from "./theory.js";
-import { buildPositionalVoicings, openVoicing, powerVoicing, fourthStringVoicing } from "./fretboard.js";
+import { RANDOM_MODES, progressionsFor, buildScale, buildProgressionChords, rootNameForPitchClass, scaleNameForProgression, parentMajor } from "./theory.js";
+import { buildPositionalVoicings, openVoicing, powerVoicing, fourthStringVoicing, buildScaleChordVoicings } from "./fretboard.js";
 
 // ─── Techniques ───────────────────────────────────────────────────────────────
 // Each voicing pass is played with a technique appropriate to how that chord
@@ -178,12 +178,14 @@ export function generateRhythm(styleKey, technique = "strum") {
 export function getVoicingPasses(use7ths) {
   if (use7ths) {
     return [
+      { type:"Scale Chords" },
       { type:"6th-anchored positional" },
       { type:"5th-anchored positional" },
       { type:"4th-anchored" },
     ];
   }
   return [
+    { type:"Scale Chords" },
     { type:"6th-anchored positional" },
     { type:"5th-anchored positional" },
     { type:"4th-anchored" },
@@ -270,9 +272,18 @@ export function buildSession(use7ths, progsOverride) {
     const chords = buildProgressionChords(rootKey, scaleName, progName, blockUse7ths);
     const passes = getVoicingPasses(blockUse7ths);
 
+    // Scale Chords mirrors the Scale Walk diagram exactly: for a mode block,
+    // that diagram is drawn in the parent major's shape (with the mode's own
+    // root marked separately), so the diatonic ladder must use the same root/
+    // scale pair or its fret positions won't match what's shown above it.
+    const modeParentRoot  = parentMajor(rootKey, scaleName);
+    const scaleChordsRoot  = modeParentRoot || rootKey;
+    const scaleChordsScale = modeParentRoot ? "Major (Ionian)" : scaleName;
+
     const voicings = passes.map(pass => {
       let chordShapes;
-      if      (pass.type === "6th-anchored positional") chordShapes = buildPositionalVoicings(chords, 6);
+      if      (pass.type === "Scale Chords") chordShapes = buildScaleChordVoicings(scaleChordsRoot, scaleChordsScale, blockUse7ths);
+      else if (pass.type === "6th-anchored positional") chordShapes = buildPositionalVoicings(chords, 6);
       else if (pass.type === "5th-anchored positional") chordShapes = buildPositionalVoicings(chords, 5);
       else if (pass.type === "4th-anchored")  chordShapes = chords.map(c => ({ ...c, voicing: fourthStringVoicing(c.root, c.quality) }));
       else if (pass.type === "Open chords")   chordShapes = chords.map(c => ({ ...c, voicing: openVoicing(c.root, c.quality) }));

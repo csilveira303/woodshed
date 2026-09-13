@@ -20,7 +20,7 @@ import { createClickScheduler } from "./audio.js";
 
 // Session persists across reloads (sessionStorage), reset only by the
 // "New Session" button or a fresh app restart (new browser tab/session).
-const SESSION_STORAGE_KEY = "guitar-practice-session-v1";
+const SESSION_STORAGE_KEY = "guitar-practice-session-v2";
 const UI_SCALE_STORAGE_KEY = "guitar-practice-ui-scale-v1";
 
 // ─── UI constants ─────────────────────────────────────────────────────────────
@@ -35,6 +35,7 @@ const THEORY_COLOR  = "#3a3a1a";
 const THEORY_ACCENT = "#c8a87a";
 
 const PASS_LABELS = {
+  "Scale Chords":            "Scale Chords",
   "6th-anchored positional": "6th Anchor",
   "5th-anchored positional": "5th Anchor",
   "4th-anchored":            "4th Anchor",
@@ -42,6 +43,7 @@ const PASS_LABELS = {
   "Power chords":            "Power",
 };
 const PASS_DESC = {
+  "Scale Chords":            "All 7 diatonic chords (I–vii°) in scale order, in the same neck position as the Scale Walk — independent of this block's progression",
   "6th-anchored positional": "Root starts on 6th string — each chord voiced at the nearest position",
   "5th-anchored positional": "Root starts on 5th string — each chord voiced at the nearest position",
   "4th-anchored":            "Root starts on 4th string — compact movable D-shape voicing",
@@ -544,8 +546,8 @@ export default function GuitarPracticeSession() {
   const progMeta = progressionsFor(block.scaleName).find(p => p.name === block.progressionName);
 
   const voicingTabLabels = block.use7ths
-    ? ["Scale Walk","6th Anchor","5th Anchor","4th Anchor"]
-    : ["Scale Walk","6th Anchor","5th Anchor","4th Anchor","Open","Power"];
+    ? ["Scale Walk","Scale Chords","6th Anchor","5th Anchor","4th Anchor"]
+    : ["Scale Walk","Scale Chords","6th Anchor","5th Anchor","4th Anchor","Open","Power"];
 
   function jumpTab(i) {
     stopPlayback(); setActiveStep(-1);
@@ -633,7 +635,7 @@ export default function GuitarPracticeSession() {
               </div>
               <div>
                 <div style={{ fontSize:"11px",color:"#c8a87a",fontWeight:700,marginBottom:"4px" }}>Working a Block</div>
-                <div>Each block runs through two stages: <b style={{color:"#e8e4dc"}}>Scale Walk</b> shows the scale's notes and a fretboard diagram to learn the shape first; <b style={{color:"#e8e4dc"}}>Chord Practice</b> then steps through the block's progression in five voicing styles — 6th/5th/4th Anchor (positional shapes built off a bass string), Open, and Power — via the tabs above the fretboard. Use ← Back / Next → to move through steps, or jump directly to a voicing tab.</div>
+                <div>Each block runs through two stages: <b style={{color:"#e8e4dc"}}>Scale Walk</b> shows the scale's notes and a fretboard diagram to learn the shape first; <b style={{color:"#e8e4dc"}}>Chord Practice</b> then steps through <b style={{color:"#e8e4dc"}}>Scale Chords</b> (all 7 diatonic chords, in the same neck position as the Scale Walk) followed by the block's own progression in 6th/5th/4th Anchor (positional shapes built off a bass string), Open, and Power — via the tabs above the fretboard. Use ← Back / Next → to move through steps, or jump directly to a voicing tab.</div>
               </div>
               <div>
                 <div style={{ fontSize:"11px",color:"#c8a87a",fontWeight:700,marginBottom:"4px" }}>Playing Along</div>
@@ -759,12 +761,12 @@ export default function GuitarPracticeSession() {
         <div style={{ background:"#141414",border:`1px solid ${accent}33`,borderRadius:"6px",padding:"8px 12px",marginBottom:"10px",fontSize:"11px",color:"#888" }}>
           <span style={{ color:accent,fontWeight:700 }}>{PASS_LABELS[voicing.type]}: </span>{PASS_DESC[voicing.type]}
         </div>
-        {(voicing.type==="6th-anchored positional"||voicing.type==="5th-anchored positional"||voicing.type==="4th-anchored") && (
+        {(voicing.type==="Scale Chords"||voicing.type==="6th-anchored positional"||voicing.type==="5th-anchored positional"||voicing.type==="4th-anchored") && (
           <StringMapBar chordShapes={voicing.chordShapes}/>
         )}
         <div style={{ background:"#141414",border:"1px solid #222",borderRadius:"8px",padding:"14px",marginBottom:"10px" }}>
           <div style={{ fontSize:"10px",color:"#666",letterSpacing:"2px",textTransform:"uppercase",marginBottom:"10px" }}>
-            {block.progressionName} — {voicing.type}
+            {voicing.type==="Scale Chords" ? "Scale Chords" : `${block.progressionName} — ${voicing.type}`}
           </div>
           <div style={{ display:"flex",gap:"10px",flexWrap:"wrap" }}>
             {voicing.chordShapes.map((cs,i)=><ChordDiagram key={i} chordName={cs.name} voicingData={cs.voicing} leftHanded={leftHanded}/>)}
