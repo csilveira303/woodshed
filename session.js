@@ -3,7 +3,7 @@
 // 4-block practice session structure (Major, Minor, Mode1, Mode2).
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { RANDOM_MODES, progressionsFor, buildScale, buildProgressionChords, rootNameForPitchClass, scaleNameForProgression, parentMajor } from "./theory.js";
+import { RANDOM_MODES, progressionsFor, buildScale, buildProgressionChords, rootNameForPitchClass, scaleNameForProgression } from "./theory.js";
 import { buildPositionalVoicings, openVoicing, powerVoicing, fourthStringVoicing, buildScaleChordVoicings } from "./fretboard.js";
 
 // ─── Techniques ───────────────────────────────────────────────────────────────
@@ -272,17 +272,14 @@ export function buildSession(use7ths, progsOverride) {
     const chords = buildProgressionChords(rootKey, scaleName, progName, blockUse7ths);
     const passes = getVoicingPasses(blockUse7ths);
 
-    // Scale Chords mirrors the Scale Walk diagram exactly: for a mode block,
-    // that diagram is drawn in the parent major's shape (with the mode's own
-    // root marked separately), so the diatonic ladder must use the same root/
-    // scale pair or its fret positions won't match what's shown above it.
-    const modeParentRoot  = parentMajor(rootKey, scaleName);
-    const scaleChordsRoot  = modeParentRoot || rootKey;
-    const scaleChordsScale = modeParentRoot ? "Major (Ionian)" : scaleName;
-
     const voicings = passes.map(pass => {
       let chordShapes;
-      if      (pass.type === "Scale Chords") chordShapes = buildScaleChordVoicings(scaleChordsRoot, scaleChordsScale, blockUse7ths);
+      // Scale Chords uses the block's own root as I, even for a mode block —
+      // e.g. D Dorian's I is D (quality "m"), not its parent major's C — so it
+      // always reads rootKey/scaleName directly, unlike the Scale Walk diagram
+      // above it, which deliberately shows mode blocks in the parent major's
+      // shape with the mode's own root marked separately.
+      if      (pass.type === "Scale Chords") chordShapes = buildScaleChordVoicings(rootKey, scaleName, blockUse7ths);
       else if (pass.type === "6th-anchored positional") chordShapes = buildPositionalVoicings(chords, 6);
       else if (pass.type === "5th-anchored positional") chordShapes = buildPositionalVoicings(chords, 5);
       else if (pass.type === "4th-anchored")  chordShapes = chords.map(c => ({ ...c, voicing: fourthStringVoicing(c.root, c.quality) }));
