@@ -170,7 +170,7 @@ function ChordDiagram({ chordName, voicingData, leftHanded }) {
         })}
         {mutedStrings.map(si=><text key={si} x={strX(si)} y={10} textAnchor="middle" style={{ fontSize:"9px",fill:"#555",fontFamily:"monospace" }}>×</text>)}
       </svg>
-      <div style={{ fontSize:"8px",color:"#555",marginTop:"-6px" }}>
+      <div style={{ fontSize:"8px",color:"#b87333",marginTop:"-6px" }}>
         {isBarre?"no open shape":baseFret>0?`Fret ${baseFret}`:"Open"}
       </div>
     </div>
@@ -262,7 +262,7 @@ function TheoryChordDiagram({ rootName, chordType, voicingData, leftHanded }) {
         })}
         {mutedStrings.map(si=><text key={si} x={strX(si)} y={12} textAnchor="middle" style={{ fontSize:"9px",fill:"#555",fontFamily:"monospace" }}>×</text>)}
       </svg>
-      {baseFret>0 && <div style={{ fontSize:"8px",color:"#555",marginTop:"-4px" }}>Fret {baseFret}</div>}
+      {baseFret>0 && <div style={{ fontSize:"8px",color:"#b87333",marginTop:"-4px" }}>Fret {baseFret}</div>}
     </div>
   );
 }
