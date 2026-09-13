@@ -21,6 +21,7 @@ import { createClickScheduler } from "./audio.js";
 // Session persists across reloads (sessionStorage), reset only by the
 // "New Session" button or a fresh app restart (new browser tab/session).
 const SESSION_STORAGE_KEY = "guitar-practice-session-v1";
+const UI_SCALE_STORAGE_KEY = "guitar-practice-ui-scale-v1";
 
 // ─── UI constants ─────────────────────────────────────────────────────────────
 // Canonical tonic spelling for each of the 12 pitch classes (Db not C#, etc.) —
@@ -381,6 +382,12 @@ export default function GuitarPracticeSession() {
   const [use7ths,       setUse7ths]       = useState(true);
   const [leftHanded,    setLeftHanded]    = useState(true);
   const [keepAwake,     setKeepAwake]     = useState(true);
+  const [uiScale,       setUiScale]       = useState(() => {
+    try {
+      const saved = Number(localStorage.getItem(UI_SCALE_STORAGE_KEY));
+      return [100,115,130,150].includes(saved) ? saved : 100;
+    } catch(e) { return 100; }
+  });
   const [settingsOpen,  setSettingsOpen]  = useState(false);
   const [helpOpen,      setHelpOpen]      = useState(false);
   const [selectedProgs, setSelectedProgs] = useState(["Random","Random","Random","Random"]);
@@ -418,6 +425,10 @@ export default function GuitarPracticeSession() {
       if (wakeLockRef.current) { wakeLockRef.current.release(); wakeLockRef.current = null; }
     };
   }, [keepAwake]);
+
+  useEffect(() => {
+    try { localStorage.setItem(UI_SCALE_STORAGE_KEY, String(uiScale)); } catch(e) {}
+  }, [uiScale]);
 
   useEffect(() => {
     if (!settingsOpen && !helpOpen) return;
@@ -543,7 +554,7 @@ export default function GuitarPracticeSession() {
   }
 
   return (
-    <div style={{ minHeight:"100vh",background:"#0d0d0d",color:"#e8e4dc",fontFamily:"'JetBrains Mono','Fira Code','Courier New',monospace",padding:"16px",boxSizing:"border-box",maxWidth:"900px",margin:"0 auto" }}>
+    <div style={{ minHeight:"100vh",background:"#0d0d0d",color:"#e8e4dc",fontFamily:"'JetBrains Mono','Fira Code','Courier New',monospace",padding:"16px",boxSizing:"border-box",maxWidth:"900px",margin:"0 auto",zoom:`${uiScale}%` }}>
 
       {/* Header */}
       <div style={{ display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:"14px",flexWrap:"wrap",gap:"8px" }}>
@@ -592,6 +603,16 @@ export default function GuitarPracticeSession() {
               <button onClick={()=>setKeepAwake(v=>!v)} style={{ textAlign:"left",background:keepAwake?"#2a3a5a":"#1a1a1a",border:`1px solid ${keepAwake?"#4a6aaa":"#333"}`,borderRadius:"6px",color:keepAwake?"#7ab8ff":"#666",fontFamily:"inherit",fontSize:"12px",padding:"10px 12px",cursor:"pointer" }}>
                 ☀️ Keep Screen Awake {keepAwake?"ON":"OFF"}
               </button>
+              <div style={{ marginTop:"4px" }}>
+                <div style={{ fontSize:"9px",color:"#666",letterSpacing:"2px",textTransform:"uppercase",marginBottom:"6px" }}>🔍 UI Scale</div>
+                <div style={{ display:"flex",gap:"5px" }}>
+                  {[100,115,130,150].map(pct=>(
+                    <button key={pct} onClick={()=>setUiScale(pct)} style={{ flex:1,background:uiScale===pct?"#b87333":"#1a1a1a",border:`1px solid ${uiScale===pct?"#e8a84a":"#333"}`,borderRadius:"6px",color:uiScale===pct?"#fff":"#666",fontFamily:"inherit",fontSize:"12px",padding:"10px 4px",cursor:"pointer" }}>
+                      {pct}%
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </div>
