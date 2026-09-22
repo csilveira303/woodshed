@@ -320,6 +320,22 @@ export const OPEN_CHORD_DB = {
   // Half-diminished
   "Dm7b5":{ shape:[null,null,0,1,1,1] },
   "Em7b5":{ shape:[0,1,2,0,2,null] },
+  // Sus2 (root-3rd-5th triad with the 3rd swapped for the 2nd)
+  "Csus2":{ shape:[null,3,0,0,1,3] },
+  "Dsus2":{ shape:[null,null,0,2,3,0] },
+  "Esus2":{ shape:[0,2,4,4,0,0] },
+  "Asus2":{ shape:[null,0,2,2,0,0] },
+  // Sus4 (root-3rd-5th triad with the 3rd swapped for the 4th)
+  "Csus4":{ shape:[null,3,3,0,1,1] },
+  "Dsus4":{ shape:[null,null,0,2,3,3] },
+  "Esus4":{ shape:[0,2,2,2,0,0] },
+  "Asus4":{ shape:[null,0,2,2,3,0] },
+  "Gsus4":{ shape:[3,3,0,0,1,3] },
+  // Major add9 (triad plus the 9th, 3rd kept)
+  "Cadd9":{ shape:[null,3,2,0,3,0] },
+  "Gadd9":{ shape:[3,2,0,2,0,3] },
+  "Aadd9":{ shape:[null,0,2,4,2,0] },
+  "Eadd9":{ shape:[0,2,2,1,0,2] },
 };
 
 export function openVoicing(rootName, quality) {
@@ -400,15 +416,41 @@ export function buildTheoryVoicing(rootName, chordType, voicingType) {
   let baseFret, shape, mutedStrings;
 
   if (voicingType === "Open chord") {
-    // Prefer an exact open shape for this quality (covers 7, maj7, m7, m7b5);
-    // otherwise fall back to the plain major/minor triad shape.
-    const hasExactShape = Object.prototype.hasOwnProperty.call(OPEN_CHORD_DB, rootName + quality);
-    const simpleQ = hasExactShape ? quality
-      : (quality.includes("m") && !quality.includes("maj") ? "m" : "");
-    const ov = openVoicing(rootName, simpleQ);
-    baseFret = ov.baseFret;
-    shape    = ov.shape;
-    mutedStrings = ov.mutedStrings;
+    const ov = OPEN_CHORD_DB[rootName + quality];
+    if (ov) {
+      // Genuine cowboy/open-position shape for this exact root+quality.
+      baseFret = 0;
+      shape    = ov.shape;
+      mutedStrings = ov.shape.map((v,i) => v === null ? i : -1).filter(i => i >= 0);
+    } else {
+      // No named open shape for this root/quality — rather than silently
+      // downgrading to a plain major/minor triad (which would show the wrong
+      // notes under the chord's real label), find the nearest chord tone for
+      // this quality on each string within the open position (frets 0-4).
+      baseFret = 0;
+      shape = [null, null, null, null, null, null];
+      const usedSemitones = new Set();
+      for (let si = 0; si < 6; si++) {
+        const sn   = 6 - si;
+        const open = STRING_OPEN_NOTE[sn];
+        let best = null, bestDist = 999, bestIsNew = false;
+        for (let fret = 0; fret <= 4; fret++) {
+          const sem = ((open + fret) - rootIdx + 144) % 12;
+          if (!chordSet.has(sem)) continue;
+          const isNew = !usedSemitones.has(sem);
+          if (best === null || (isNew && !bestIsNew) || (isNew === bestIsNew && fret < bestDist)) {
+            bestDist  = fret;
+            best      = fret;
+            bestIsNew = isNew;
+          }
+        }
+        shape[si] = best;
+        if (best !== null) {
+          usedSemitones.add(((open + best) - rootIdx + 144) % 12);
+        }
+      }
+      mutedStrings = shape.map((v,i) => v === null ? i : -1).filter(i => i >= 0);
+    }
   } else {
     const strNum = voicingType === "6th string" ? 6 : 5;
     baseFret = strNum === 6 ? fretFor6th(rootName) : fretFor5th(rootName);

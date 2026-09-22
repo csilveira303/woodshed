@@ -355,8 +355,10 @@ export const INTERVAL_NAMES = {
 /** Context-aware interval label. Handles 6 vs 13, 2 vs 9, 4 vs 11. */
 export function getIntervalName(semitone, quality) {
   if (semitone === 9 && (quality.includes("6") || quality === "dim7")) return "6";
-  if (semitone === 2 && (quality === "sus2" || quality === "add9"  || quality === "madd9"))  return "2";
-  if (semitone === 5 && (quality === "sus4" || quality === "add11" || quality === "madd11")) return "4";
+  // sus2/sus4 replace the 3rd/5th, so the added tone reads as a plain 2nd/4th;
+  // add9/madd9/add11/madd11 keep the 3rd/5th, so it reads as an upper extension (9/11).
+  if (semitone === 2 && quality === "sus2") return "2";
+  if (semitone === 5 && quality === "sus4") return "4";
   return INTERVAL_NAMES[semitone] || "?";
 }
 
