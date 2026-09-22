@@ -332,7 +332,7 @@ export const OPEN_CHORD_DB = {
   "Asus4":{ shape:[null,0,2,2,3,0] },
   "Gsus4":{ shape:[3,3,0,0,1,3] },
   // Major add9 (triad plus the 9th, 3rd kept)
-  "Cadd9":{ shape:[null,3,2,0,3,0] },
+  "Cadd9":{ shape:[null,3,2,0,3,3] },
   "Gadd9":{ shape:[3,2,0,2,0,3] },
   "Aadd9":{ shape:[null,0,2,4,2,0] },
   "Eadd9":{ shape:[0,2,2,1,0,2] },
