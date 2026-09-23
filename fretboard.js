@@ -402,8 +402,75 @@ export function buildPositionalVoicings(chords, anchor) {
 
 // ─── Theory voicing (chord tone window) ───────────────────────────────────────
 /**
+ * Finds a physically playable shape for a dense chord (9ths/11ths/13ths/etc.
+ * with no fixed shape) within a limited fret window around baseFret.
+ *
+ * Two passes:
+ *  1. Walk the chord's intervals in priority order and give each one the
+ *     closest not-yet-used string that can reach it. This guarantees every
+ *     distinct color tone gets a slot before any string doubles up — the
+ *     naive per-string search used to let doubled roots crowd out the
+ *     chord's actual named extensions (e.g. a "13#11" voicing that never
+ *     played the 13 or the #11). If there are more than 4 distinct tones,
+ *     the plain 5th is pushed to the back of the priority list, since it's
+ *     the tone real chord charts drop first when a dense chord won't fit on
+ *     six strings — the 3rd/7th/color tones are what define the sound.
+ *  2. Any strings left over (fewer chord tones than strings) get the
+ *     nearest available tone, repeats allowed.
+ *
+ * The window itself is kept to a realistic hand span (4 frets) rather than
+ * letting each string reach independently, which used to produce shapes
+ * spanning 5-6 frets — impossible to actually fret in one grip.
+ */
+function nearestChordToneShape(rootIdx, chordSet, baseFret, offsetMin, offsetMax) {
+  let priority = [...chordSet];
+  if (priority.length > 4 && chordSet.has(7)) {
+    priority = [...priority.filter(iv => iv !== 7), 7];
+  }
+
+  const shape = [null, null, null, null, null, null]; // [str6…str1]
+  const assigned = new Set();
+
+  for (const sem of priority) {
+    let bestSi = null, bestOffset = null, bestDist = Infinity;
+    for (let si = 0; si < 6; si++) {
+      if (assigned.has(si)) continue;
+      const open = STRING_OPEN_NOTE[6 - si];
+      for (let offset = offsetMin; offset <= offsetMax; offset++) {
+        const fret = baseFret + offset;
+        if (fret < 0) continue;
+        if (((open + fret) - rootIdx + 144) % 12 !== sem) continue;
+        const dist = Math.abs(offset);
+        if (dist < bestDist) { bestDist = dist; bestSi = si; bestOffset = offset; }
+      }
+    }
+    if (bestSi !== null) {
+      shape[bestSi] = bestOffset;
+      assigned.add(bestSi);
+    }
+  }
+
+  for (let si = 0; si < 6; si++) {
+    if (assigned.has(si)) continue;
+    const open = STRING_OPEN_NOTE[6 - si];
+    let best = null, bestDist = Infinity;
+    for (let offset = offsetMin; offset <= offsetMax; offset++) {
+      const fret = baseFret + offset;
+      if (fret < 0) continue;
+      const sem = ((open + fret) - rootIdx + 144) % 12;
+      if (!chordSet.has(sem)) continue;
+      const dist = Math.abs(offset);
+      if (dist < bestDist) { bestDist = dist; best = offset; }
+    }
+    shape[si] = best;
+  }
+
+  return shape;
+}
+
+/**
  * Builds a voicing for the theory block by finding the nearest chord tone on
- * each string within a ±4 fret window around the root. Works for all 32 chord
+ * each string within a fret window around the root. Works for all 32 chord
  * types including extended chords where no fixed shape exists.
  *
  * For open chords, falls back to OPEN_CHORD_DB if available.
@@ -425,30 +492,10 @@ export function buildTheoryVoicing(rootName, chordType, voicingType) {
     } else {
       // No named open shape for this root/quality — rather than silently
       // downgrading to a plain major/minor triad (which would show the wrong
-      // notes under the chord's real label), find the nearest chord tone for
-      // this quality on each string within the open position (frets 0-4).
+      // notes under the chord's real label), find a playable shape within
+      // the open position (frets 0-4).
       baseFret = 0;
-      shape = [null, null, null, null, null, null];
-      const usedSemitones = new Set();
-      for (let si = 0; si < 6; si++) {
-        const sn   = 6 - si;
-        const open = STRING_OPEN_NOTE[sn];
-        let best = null, bestDist = 999, bestIsNew = false;
-        for (let fret = 0; fret <= 4; fret++) {
-          const sem = ((open + fret) - rootIdx + 144) % 12;
-          if (!chordSet.has(sem)) continue;
-          const isNew = !usedSemitones.has(sem);
-          if (best === null || (isNew && !bestIsNew) || (isNew === bestIsNew && fret < bestDist)) {
-            bestDist  = fret;
-            best      = fret;
-            bestIsNew = isNew;
-          }
-        }
-        shape[si] = best;
-        if (best !== null) {
-          usedSemitones.add(((open + best) - rootIdx + 144) % 12);
-        }
-      }
+      shape = nearestChordToneShape(rootIdx, chordSet, 0, 0, 4);
       mutedStrings = shape.map((v,i) => v === null ? i : -1).filter(i => i >= 0);
     }
   } else {
@@ -464,36 +511,9 @@ export function buildTheoryVoicing(rootName, chordType, voicingType) {
       shape = strNum === 6 ? shapeFor6th(quality) : shapeFor5th(quality);
       mutedStrings = shape.map((v,i) => v === null ? i : -1).filter(i => i >= 0);
     } else {
-      // Find the nearest chord tone on each string within window [baseFret-1, baseFret+4].
-      // Prefer a chord tone not already shown on another string first, then nearest fret —
-      // otherwise dense chords (9ths/11ths/13ths, which cover many of the 12 pitch classes)
-      // find a valid tone at offset 0 on almost every string and collapse into a flat barre
-      // that repeats the same 1-2 intervals instead of showing the chord's actual voicing.
-      shape = [null, null, null, null, null, null]; // [str6…str1]
-      const usedSemitones = new Set();
-      for (let si = 0; si < 6; si++) {
-        const sn   = 6 - si; // si=0→str6, si=5→str1
-        const open = STRING_OPEN_NOTE[sn];
-        let best = null, bestDist = 999, bestIsNew = false;
-        for (let offset = -1; offset <= 4; offset++) {
-          const fret = baseFret + offset;
-          if (fret < 0) continue;
-          const sem = ((open + fret) - rootIdx + 144) % 12;
-          if (!chordSet.has(sem)) continue;
-          const isNew = !usedSemitones.has(sem);
-          const dist  = Math.abs(offset);
-          if (best === null || (isNew && !bestIsNew) || (isNew === bestIsNew && dist < bestDist)) {
-            bestDist  = dist;
-            best      = offset;
-            bestIsNew = isNew;
-          }
-        }
-        shape[si] = best;
-        if (best !== null) {
-          const fret = baseFret + best;
-          usedSemitones.add(((open + fret) - rootIdx + 144) % 12);
-        }
-      }
+      // Extended qualities (9ths/11ths/13ths/etc.) have no fixed shape —
+      // find a playable one within a realistic 4-fret barre-hand span.
+      shape = nearestChordToneShape(rootIdx, chordSet, baseFret, -1, 3);
       mutedStrings = shape.map((v,i) => v === null ? i : -1).filter(i => i >= 0);
     }
   }
