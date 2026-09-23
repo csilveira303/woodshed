@@ -359,6 +359,10 @@ export function getIntervalName(semitone, quality) {
   // add9/madd9/add11/madd11 keep the 3rd/5th, so it reads as an upper extension (9/11).
   if (semitone === 2 && quality === "sus2") return "2";
   if (semitone === 5 && quality === "sus4") return "4";
+  // The diminished triad/7th/half-diminished chords use a flatted 5th, not a
+  // sharped 11th — only the explicit #11 chord types (maj7#11, 9#11, etc.)
+  // mean the extended tension.
+  if (semitone === 6 && (quality === "°" || quality === "dim7" || quality === "m7b5")) return "b5";
   return INTERVAL_NAMES[semitone] || "?";
 }
 

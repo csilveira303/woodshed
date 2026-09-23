@@ -203,13 +203,20 @@ export function shapeFor6th(quality) {
   const isM7b5  = quality === "m7b5";
   const isM7    = quality === "m7";
   const isDom7  = quality === "7";
-  if (isMaj7)  return [0,null,1,1,0,null]; // E=root, A=mute, D=+1(maj7), G=+1(3rd), B=+0(5th), e=mute
-  if (isM7b5)  return [0,1,0,0,null,null]; // E=root, A=+1(b5), D=+0(b7), G=+0(b3), mute B and e
-  if (isM7)    return [0,2,0,0,0,0];       // full barre + 5th string up 2
-  if (isDom7)  return [0,2,0,1,0,0];
-  if (isDim)   return [0,1,2,0,null,null]; // E=root, A=+1(b5), D=+2(root), G=+0(b3), mute B and e
-  if (isMinor) return [0,2,2,0,0,0];
-  return              [0,2,2,1,0,0];
+  if (isMaj7)   return [0,null,1,1,0,null]; // E=root, A=mute, D=+1(maj7), G=+1(3rd), B=+0(5th), e=mute
+  if (isM7b5)   return [0,1,0,0,null,null]; // E=root, A=+1(b5), D=+0(b7), G=+0(b3), mute B and e
+  if (isM7)     return [0,2,0,0,0,0];       // full barre + 5th string up 2
+  if (isDom7)   return [0,2,0,1,0,0];
+  if (isDim)    return [0,1,2,0,null,null]; // E=root, A=+1(b5), D=+2(root), G=+0(b3), mute B and e
+  // Verified against jguitar.com (F/A root barre shapes): each is the standard
+  // major/minor/E-shape barre with one note moved to add the color tone.
+  if (quality === "5")     return [0,2,2,null,null,null];  // power chord: root+5th only
+  if (quality === "dim7")  return [0,1,2,0,2,0];            // fully symmetric, repeats every 3 frets
+  if (quality === "sus4")  return [0,0,2,2,0,0];            // major barre with the 3rd raised to the 4th
+  if (quality === "maj6")  return [0,2,2,1,2,0];            // E6 shape: major barre, 5th (B-string) raised to 6th
+  if (quality === "m6")    return [0,2,2,0,2,0];            // Em6 shape: minor barre, 5th (B-string) raised to 6th
+  if (isMinor)  return [0,2,2,0,0,0];
+  return               [0,2,2,1,0,0];
 }
 
 export function shapeFor5th(quality) {
@@ -219,14 +226,30 @@ export function shapeFor5th(quality) {
   const isM7b5  = quality === "m7b5";
   const isM7    = quality === "m7";
   const isDom7  = quality === "7";
-  if (isMaj7)  return [null,0,2,1,2,0];
-  if (isM7b5)  return [null,0,1,0,1,null]; // root/b5/b7/b3, mute E and e (user-specified)
-  if (isM7)    return [null,0,2,0,1,0];
-  if (isDom7)  return [null,0,2,0,2,0];
-  if (isDim)   return [null,0,1,2,1,null];
-  if (isMinor) return [null,0,2,2,1,0];
-  return              [null,0,2,2,2,0];
+  if (isMaj7)   return [null,0,2,1,2,0];
+  if (isM7b5)   return [null,0,1,0,1,null]; // root/b5/b7/b3, mute E and e (user-specified)
+  if (isM7)     return [null,0,2,0,1,0];
+  if (isDom7)   return [null,0,2,0,2,0];
+  if (isDim)    return [null,0,1,2,1,null];
+  // Verified against jguitar.com (B/F root barre shapes): each is the standard
+  // A-shape major/minor barre with one note moved to add the color tone.
+  // sus2 has no equivalent on the 6th string — see NO_PRACTICAL_SHAPE below.
+  if (quality === "5")     return [null,0,2,2,null,null];   // power chord: root+5th only
+  if (quality === "dim7")  return [null,0,1,2,1,2];          // fully symmetric, repeats every 3 frets
+  if (quality === "sus2")  return [null,0,2,2,0,0];          // A-shape barre with the 3rd released to the 2nd
+  if (quality === "sus4")  return [null,0,0,2,3,0];          // A-shape barre with the 3rd raised to the 4th
+  if (quality === "maj6")  return [null,0,2,2,2,2];          // A6 shape: major barre, 3rd (G-string) raised to 6th
+  if (quality === "m6")    return [null,0,2,2,1,2];          // Am6 shape: minor barre, 5th (e-string) raised to 6th
+  if (isMinor)  return [null,0,2,2,1,0];
+  return               [null,0,2,2,2,0];
 }
+
+// sus2 has no practical movable shape rooted on the 6th string — every
+// fingering either drops the low E or requires an unplayable stretch.
+// Confirmed against guitar-chord.org, which omits it for the same reason.
+export const NO_PRACTICAL_SHAPE = {
+  "6th string": new Set(["sus2"]),
+};
 
 // Movable "D-shape" chords, rooted on the 4th string with strings 6/5 always
 // muted — matches the classic open D/D7/Dmaj7/Dm7/Dm7b5 shapes (same values
@@ -319,7 +342,7 @@ export const OPEN_CHORD_DB = {
   "Dm7":  { shape:[null,null,0,2,1,1] },
   // Half-diminished
   "Dm7b5":{ shape:[null,null,0,1,1,1] },
-  "Em7b5":{ shape:[0,1,2,0,2,null] },
+  "Em7b5":{ shape:[0,1,0,0,null,0] },
   // Sus2 (root-3rd-5th triad with the 3rd swapped for the 2nd)
   "Csus2":{ shape:[null,3,0,0,1,3] },
   "Dsus2":{ shape:[null,null,0,2,3,0] },
@@ -506,8 +529,10 @@ export function buildTheoryVoicing(rootName, chordType, voicingType) {
     // directly — it's the standard barre-chord fingering (e.g. the classic A7/E7
     // shapes). Only fall back to the nearest-chord-tone search below for
     // extended qualities (9ths/11ths/13ths/etc.) that have no fixed shape.
-    const FIXED_SHAPE_QUALITIES = new Set(["", "m", "°", "maj7", "m7", "7", "m7b5"]);
-    if (FIXED_SHAPE_QUALITIES.has(quality)) {
+    const FIXED_SHAPE_QUALITIES_6TH = new Set(["", "m", "°", "maj7", "m7", "7", "m7b5", "5", "dim7", "sus4", "maj6", "m6"]);
+    const FIXED_SHAPE_QUALITIES_5TH = new Set(["", "m", "°", "maj7", "m7", "7", "m7b5", "5", "dim7", "sus2", "sus4", "maj6", "m6"]);
+    const fixedShapeQualities = strNum === 6 ? FIXED_SHAPE_QUALITIES_6TH : FIXED_SHAPE_QUALITIES_5TH;
+    if (fixedShapeQualities.has(quality)) {
       shape = strNum === 6 ? shapeFor6th(quality) : shapeFor5th(quality);
       mutedStrings = shape.map((v,i) => v === null ? i : -1).filter(i => i >= 0);
     } else {
@@ -517,6 +542,8 @@ export function buildTheoryVoicing(rootName, chordType, voicingType) {
       mutedStrings = shape.map((v,i) => v === null ? i : -1).filter(i => i >= 0);
     }
   }
+
+  const noPracticalShape = NO_PRACTICAL_SHAPE[voicingType]?.has(quality) ?? false;
 
   // Label each occupied string with its interval
   const stringData = shape.map((offset, si) => {
@@ -535,5 +562,5 @@ export function buildTheoryVoicing(rootName, chordType, voicingType) {
     };
   });
 
-  return { baseFret, shape, mutedStrings, stringData };
+  return { baseFret, shape, mutedStrings, stringData, noPracticalShape };
 }

@@ -340,6 +340,11 @@ function ChordTheoryBlock({ session, leftHanded }) {
       </div>
       {voicingData && (
         <div style={{ background:"#141414",border:"1px solid #222",borderRadius:"8px",padding:"16px",marginBottom:"14px" }}>
+          {voicingData.noPracticalShape && (
+            <div style={{ fontSize:"11px",color:"#c8a87a",background:"#c8a87a1a",border:"1px solid #c8a87a44",borderRadius:"5px",padding:"8px 10px",marginBottom:"12px" }}>
+              No practical movable shape exists for {chordType.label} rooted on the {voicingType.replace(" string","")} string — shown below is the closest playable approximation, not a standard fingering.
+            </div>
+          )}
           <div style={{ display:"flex",gap:"24px",alignItems:"flex-start",flexWrap:"wrap" }}>
             <TheoryChordDiagram rootName={rootName} chordType={chordType} voicingData={voicingData} leftHanded={leftHanded}/>
             <div style={{ flex:1,minWidth:"180px" }}>
