@@ -214,7 +214,7 @@ export function shapeFor6th(quality) {
   if (quality === "dim7")  return [0,1,2,0,2,0];            // fully symmetric, repeats every 3 frets
   if (quality === "sus4")  return [0,0,2,2,0,0];            // major barre with the 3rd raised to the 4th
   if (quality === "maj6")  return [0,2,2,1,2,0];            // E6 shape: major barre, 5th (B-string) raised to 6th
-  if (quality === "m6")    return [0,2,2,0,2,0];            // Em6 shape: minor barre, 5th (B-string) raised to 6th
+  if (quality === "m6")    return [0,null,-1,0,0,null];     // Gm6 "3x233x" grip: R, 6 (D), b3 (G), 5 (B); mute A and e
   if (isMinor)  return [0,2,2,0,0,0];
   return               [0,2,2,1,0,0];
 }
@@ -338,6 +338,10 @@ export const OPEN_CHORD_DB = {
   "Amaj7":{ shape:[null,0,2,1,2,0] },
   // Minor 7ths
   "Em7":  { shape:[0,2,0,0,0,0] },
+  // Minor 6ths
+  "Em6":  { shape:[0,2,2,0,2,0] },
+  "Am6":  { shape:[null,0,2,2,1,2] },
+  "Dm6":  { shape:[null,null,0,2,0,1] },
   "Am7":  { shape:[null,0,2,0,1,0] },
   "Dm7":  { shape:[null,null,0,2,1,1] },
   // Half-diminished
