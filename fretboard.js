@@ -241,6 +241,7 @@ export function shapeFor5th(quality) {
   if (quality === "sus4")  return [null,0,0,2,3,0];          // A-shape barre with the 3rd raised to the 4th
   if (quality === "maj6")  return [null,0,2,2,2,2];          // A6 shape: major barre, 3rd (G-string) raised to 6th
   if (quality === "m6")    return [null,0,2,2,1,2];          // Am6 shape: minor barre, 5th (e-string) raised to 6th
+  if (quality === "9")     return [null,0,-1,0,0,0];         // B9 "x21222" grip: R, 3 (D), b7 (G), 9 (B), 5 (e); fingered 2-1-3-3-3 (user-specified)
   if (isMinor)  return [null,0,2,2,1,0];
   return               [null,0,2,2,2,0];
 }
@@ -535,7 +536,7 @@ export function buildTheoryVoicing(rootName, chordType, voicingType) {
     // shapes). Only fall back to the nearest-chord-tone search below for
     // extended qualities (9ths/11ths/13ths/etc.) that have no fixed shape.
     const FIXED_SHAPE_QUALITIES_6TH = new Set(["", "m", "°", "maj7", "m7", "7", "m7b5", "5", "dim7", "sus4", "maj6", "m6", "m13"]);
-    const FIXED_SHAPE_QUALITIES_5TH = new Set(["", "m", "°", "maj7", "m7", "7", "m7b5", "5", "dim7", "sus2", "sus4", "maj6", "m6"]);
+    const FIXED_SHAPE_QUALITIES_5TH = new Set(["", "m", "°", "maj7", "m7", "7", "m7b5", "5", "dim7", "sus2", "sus4", "maj6", "m6", "9"]);
     const fixedShapeQualities = strNum === 6 ? FIXED_SHAPE_QUALITIES_6TH : FIXED_SHAPE_QUALITIES_5TH;
     if (fixedShapeQualities.has(quality)) {
       shape = strNum === 6 ? shapeFor6th(quality) : shapeFor5th(quality);
