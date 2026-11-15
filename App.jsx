@@ -147,9 +147,21 @@ function ScaleDiagram({ rootName, scaleName, leftHanded, modalRoot }) {
   );
 }
 
+// For movable (baseFret>0) shapes, the box's first row is the lowest fretted
+// note — usually the root's fret, but one lower for grips like m7b5 (3x332x)
+// that reach behind the root. Returns that top fret and a row mapper
+// (1 = first row). Open chords (baseFret 0) keep offsets as literal frets.
+function diagramFrame(baseFret, shape) {
+  if (baseFret === 0) return { topFret: 0, row: o => o };
+  const offsets = (shape||[]).filter(o => o !== null);
+  const minOff  = offsets.length ? Math.min(...offsets) : 0;
+  return { topFret: baseFret + minOff, row: o => o - minOff + 1 };
+}
+
 // ─── ChordDiagram ─────────────────────────────────────────────────────────────
 function ChordDiagram({ chordName, voicingData, leftHanded }) {
   const { baseFret, shape, mutedStrings=[], isBarre, stringRoot } = voicingData;
+  const { topFret, row } = diagramFrame(baseFret, shape);
   const svgW=72, svgH=82, gridLeft=10, gridRight=62, gridTop=16;
   const strSpacing=(gridRight-gridLeft)/5;
   function strX(si) { return leftHanded ? gridLeft+(5-si)*strSpacing : gridLeft+si*strSpacing; }
@@ -163,12 +175,12 @@ function ChordDiagram({ chordName, voicingData, leftHanded }) {
         {baseFret===0 && <rect x={gridLeft} y={13} width={gridRight-gridLeft} height={3} fill="#c8a87a"/>}
         {[0,1,2,3,4].map(f=><rect key={f} x={gridLeft} y={gridTop+f*12} width={gridRight-gridLeft} height={1} fill="#333"/>)}
         {[0,1,2,3,4,5].map(si=><rect key={si} x={strX(si)-0.5} y={13} width={si<=1?1.5:si<=3?1:0.75} height={60} fill={si<=1?"#666":si<=3?"#555":"#444"}/>)}
-        {baseFret>0 && <text x={leftHanded?svgW-3:5} y={22} textAnchor="middle" style={{ fontSize:"7px",fill:"#b87333",fontFamily:"monospace" }}>{baseFret}fr</text>}
+        {baseFret>0 && <text x={leftHanded?svgW-3:5} y={22} textAnchor="middle" style={{ fontSize:"7px",fill:"#b87333",fontFamily:"monospace" }}>{topFret}fr</text>}
         {shape && shape.map((fret,si)=>{
           if (fret===null||mutedStrings.includes(si)) return null;
           const cx=strX(si);
-          if (fret===0) return <circle key={si} cx={cx} cy={10} r={3.5} fill="none" stroke="#7ab8c8" strokeWidth={1.5}/>;
-          return <circle key={si} cx={cx} cy={gridTop+(fret-0.5)*12} r={4.5} fill="#b87333"/>;
+          if (fret===0&&baseFret===0) return <circle key={si} cx={cx} cy={10} r={3.5} fill="none" stroke="#7ab8c8" strokeWidth={1.5}/>;
+          return <circle key={si} cx={cx} cy={gridTop+(row(fret)-0.5)*12} r={4.5} fill="#b87333"/>;
         })}
         {mutedStrings.map(si=><text key={si} x={strX(si)} y={10} textAnchor="middle" style={{ fontSize:"9px",fill:"#555",fontFamily:"monospace" }}>×</text>)}
       </svg>
@@ -240,6 +252,7 @@ function RhythmStrip({ steps, activeStep, technique, styleLabel, stepsPerBeat })
 // ─── TheoryChordDiagram ───────────────────────────────────────────────────────
 function TheoryChordDiagram({ rootName, chordType, voicingData, leftHanded }) {
   const { baseFret, shape, mutedStrings=[], stringData } = voicingData;
+  const { topFret, row } = diagramFrame(baseFret, shape);
   const svgW=80, svgH=100, gridLeft=12, gridRight=68, gridTop=18;
   const strSpacing=(gridRight-gridLeft)/5;
   function strX(si) { return leftHanded ? gridLeft+(5-si)*strSpacing : gridLeft+si*strSpacing; }
@@ -252,14 +265,14 @@ function TheoryChordDiagram({ rootName, chordType, voicingData, leftHanded }) {
         {baseFret===0 && <rect x={gridLeft} y={15} width={gridRight-gridLeft} height={3} fill="#c8a87a"/>}
         {[0,1,2,3,4].map(f=><rect key={f} x={gridLeft} y={gridTop+f*14} width={gridRight-gridLeft} height={1} fill="#333"/>)}
         {[0,1,2,3,4,5].map(si=><rect key={si} x={strX(si)-0.5} y={15} width={si<=1?1.5:si<=3?1:0.75} height={60} fill={si<=1?"#666":si<=3?"#555":"#444"}/>)}
-        {baseFret>0 && <text x={leftHanded?svgW-4:6} y={26} textAnchor="middle" style={{ fontSize:"7px",fill:"#b87333",fontFamily:"monospace" }}>{baseFret}fr</text>}
+        {baseFret>0 && <text x={leftHanded?svgW-4:6} y={26} textAnchor="middle" style={{ fontSize:"7px",fill:"#b87333",fontFamily:"monospace" }}>{topFret}fr</text>}
         {shape && shape.map((offset,si)=>{
           if (offset===null||mutedStrings.includes(si)) return null;
           const cx=strX(si), sd=stringData[si];
           if (!sd) return null;
           const color=INTERVAL_COLORS[sd.interval]||"#555";
           if (offset===0&&baseFret===0) return <g key={si}><circle cx={cx} cy={12} r={5} fill="none" stroke={color} strokeWidth={1.5}/><text x={cx} y={15} textAnchor="middle" style={{ fontSize:"6px",fill:color,fontFamily:"monospace",fontWeight:"bold" }}>{sd.interval}</text></g>;
-          const cy=gridTop+(offset-0.5)*14;
+          const cy=gridTop+(row(offset)-0.5)*14;
           return <g key={si}><circle cx={cx} cy={cy} r={7} fill={sd.semitone===0?"#b87333":color+"55"} stroke={color} strokeWidth={1.5}/><text x={cx} y={cy+3} textAnchor="middle" style={{ fontSize:"7px",fill:"#fff",fontFamily:"monospace",fontWeight:"bold" }}>{sd.interval}</text></g>;
         })}
         {mutedStrings.map(si=><text key={si} x={strX(si)} y={12} textAnchor="middle" style={{ fontSize:"9px",fill:"#555",fontFamily:"monospace" }}>×</text>)}
