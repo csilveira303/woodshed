@@ -25,8 +25,8 @@
 // 4. CHORD VOICING SHAPES: shape[] arrays use offset from baseFret.
 //    shape[0] = str6 (low E), shape[5] = str1 (high e). null = muted.
 //    For standard barre chords baseFret = root fret on that string.
-//    Exception: m7b5 on 6th string has B-string one fret below root, so
-//    shape = [0,null,1,1,0,null] at baseFret = rootFret (no adjustment needed).
+//    m7b5 on 6th string: shape = [0,null,0,0,-1,null] (Gm7b5 = 3x332x), with
+//    the b5 on the B string one fret below root; baseFret = rootFret.
 //
 // 5. OPEN CHORD DB: Only genuine cowboy/open-position shapes.
 //    F: D-string root at fret 3, partial barre at fret 1 (user-specified).
@@ -204,7 +204,7 @@ export function shapeFor6th(quality) {
   const isM7    = quality === "m7";
   const isDom7  = quality === "7";
   if (isMaj7)   return [0,null,1,1,0,null]; // E=root, A=mute, D=+1(maj7), G=+1(3rd), B=+0(5th), e=mute
-  if (isM7b5)   return [0,1,0,0,null,null]; // E=root, A=+1(b5), D=+0(b7), G=+0(b3), mute B and e
+  if (isM7b5)   return [0,null,0,0,-1,null]; // Gm7b5 "3x332x" grip: R, b7 (D), b3 (G), b5 (B); mute A and e (user-specified)
   if (isM7)     return [0,2,0,0,0,0];       // full barre + 5th string up 2
   if (isDom7)   return [0,2,0,1,0,0];
   if (isDim)    return [0,1,2,0,null,null]; // E=root, A=+1(b5), D=+2(root), G=+0(b3), mute B and e
