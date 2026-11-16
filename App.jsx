@@ -347,17 +347,26 @@ function ChordTheoryBlock({ session, leftHanded }) {
         <button onClick={randomize} style={{ background:"#1a1a1a",border:"1px solid #444",borderRadius:"6px",color:accent,fontFamily:"inherit",fontSize:"12px",padding:"7px 14px",cursor:"pointer" }}>⚄ Random</button>
       </div>
       <div style={{ display:"flex",gap:"5px",marginBottom:"14px" }}>
-        {["6th string","5th string","Open chord"].map(opt=>(
+        {["6th string","5th string","4th string","Open chord"].map(opt=>(
           <button key={opt} onClick={()=>setVoicingType(opt)} style={{ flex:1,padding:"6px 4px",background:voicingType===opt?"#c8a87a33":"#141414",border:`1px solid ${voicingType===opt?"#c8a87a":"#222"}`,borderRadius:"5px",color:voicingType===opt?"#fff":"#555",fontFamily:"inherit",fontSize:"10px",cursor:"pointer" }}>{opt}</button>
         ))}
       </div>
       {voicingData && (
         <div style={{ background:"#141414",border:"1px solid #222",borderRadius:"8px",padding:"16px",marginBottom:"14px" }}>
-          {voicingData.noPracticalShape && (
-            <div style={{ fontSize:"11px",color:"#c8a87a",background:"#c8a87a1a",border:"1px solid #c8a87a44",borderRadius:"5px",padding:"8px 10px",marginBottom:"12px" }}>
-              No practical movable shape exists for {chordType.label} rooted on the {voicingType.replace(" string","")} string — shown below is the closest playable approximation, not a standard fingering.
+          {voicingData.noShape ? (
+            <div>
+              <div style={{ fontSize:"14px",fontWeight:700,color:"#f0ebe0",marginBottom:"2px" }}>{rootName}{chordType.quality}</div>
+              <div style={{ fontSize:"10px",color:"#888",marginBottom:"2px" }}>{chordType.label}</div>
+              <div style={{ fontSize:"9px",color:"#c8a87a",marginBottom:"12px" }}>{chordType.formula}</div>
+              <div style={{ fontSize:"11px",color:"#c8a87a",background:"#c8a87a1a",border:"1px solid #c8a87a44",borderRadius:"5px",padding:"8px 10px",marginBottom:"14px" }}>
+                {voicingType==="Open chord"
+                  ? `There's no common open shape for ${rootName}${chordType.quality}.`
+                  : `There's no common shape for ${chordType.label} rooted on the ${voicingType}.`}
+              </div>
+              <div style={{ fontSize:"10px",color:"#666",letterSpacing:"2px",textTransform:"uppercase",marginBottom:"10px" }}>Chord Tones</div>
+              <IntervalTable chordNotes={chordNotes}/>
             </div>
-          )}
+          ) : (
           <div style={{ display:"flex",gap:"24px",alignItems:"flex-start",flexWrap:"wrap" }}>
             <TheoryChordDiagram rootName={rootName} chordType={chordType} voicingData={voicingData} leftHanded={leftHanded}/>
             <div style={{ flex:1,minWidth:"180px" }}>
@@ -383,6 +392,7 @@ function ChordTheoryBlock({ session, leftHanded }) {
               </div>
             </div>
           </div>
+          )}
         </div>
       )}
       <div style={{ background:"#141414",border:"1px solid #1e1e1e",borderRadius:"6px",padding:"10px 12px" }}>
@@ -661,7 +671,7 @@ export default function GuitarPracticeSession() {
               </div>
               <div>
                 <div style={{ fontSize:"11px",color:"#c8a87a",fontWeight:700,marginBottom:"4px" }}>Theory Tab</div>
-                <div>Tap 🎸 Theory to explore any chord on its own — pick a Root and Chord Type (roots from your current session are marked ★) and a voicing style (6th string / 5th string / Open chord) to see its interval breakdown, diagram, and string-by-string notes. Tap ⚄ Random for a random chord. This is a standalone reference, independent of the active block's progression.</div>
+                <div>Tap 🎸 Theory to explore any chord on its own — pick a Root and Chord Type (roots from your current session are marked ★) and a voicing style (6th string / 5th string / 4th string / Open chord) to see its interval breakdown, diagram, and string-by-string notes. Tap ⚄ Random for a random chord. This is a standalone reference, independent of the active block's progression.</div>
               </div>
               <div>
                 <div style={{ fontSize:"11px",color:"#c8a87a",fontWeight:700,marginBottom:"4px" }}>Progressions</div>

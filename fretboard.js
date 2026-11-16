@@ -234,7 +234,8 @@ export function shapeFor5th(quality) {
   if (isDim)    return [null,0,1,2,1,null];
   // Verified against jguitar.com (B/F root barre shapes): each is the standard
   // A-shape major/minor barre with one note moved to add the color tone.
-  // sus2 has no equivalent on the 6th string — see NO_PRACTICAL_SHAPE below.
+  // sus2 has no practical 6th-string equivalent, so the Theory view reports
+  // "no common shape" there (see FIXED_SHAPE_QUALITIES in buildTheoryVoicing).
   if (quality === "5")     return [null,0,2,2,null,null];   // power chord: root+5th only
   if (quality === "dim7")  return [null,0,1,2,1,2];          // fully symmetric, repeats every 3 frets
   if (quality === "sus2")  return [null,0,2,2,0,0];          // A-shape barre with the 3rd released to the 2nd
@@ -245,13 +246,6 @@ export function shapeFor5th(quality) {
   if (isMinor)  return [null,0,2,2,1,0];
   return               [null,0,2,2,2,0];
 }
-
-// sus2 has no practical movable shape rooted on the 6th string — every
-// fingering either drops the low E or requires an unplayable stretch.
-// Confirmed against guitar-chord.org, which omits it for the same reason.
-export const NO_PRACTICAL_SHAPE = {
-  "6th string": new Set(["sus2"]),
-};
 
 // Movable "D-shape" chords, rooted on the 4th string with strings 6/5 always
 // muted — matches the classic open D/D7/Dmaj7/Dm7/Dm7b5 shapes (same values
@@ -268,6 +262,14 @@ export function shapeFor4th(quality) {
   if (isM7)    return [null,null,0,2,1,1];
   if (isDom7)  return [null,null,0,2,1,2];
   if (isDim)   return [null,null,0,1,null,1];
+  // Classic open-D family shapes made movable (the 0s become a barre at the root):
+  if (quality === "5")    return [null,null,0,2,3,null]; // D5   xx023x: R, 5, R
+  if (quality === "sus2") return [null,null,0,2,3,0];    // Dsus2 xx0230: R, 5, R, 2
+  if (quality === "sus4") return [null,null,0,2,3,3];    // Dsus4 xx0233: R, 5, R, 4
+  if (quality === "maj6") return [null,null,0,2,0,2];    // D6   xx0202: R, 5, 6, 3
+  if (quality === "m6")   return [null,null,0,2,0,1];    // Dm6  xx0201: R, 5, 6, b3
+  if (quality === "+")    return [null,null,0,3,3,2];    // D+   xx0332: R, #5, R, 3
+  if (quality === "dim7") return [null,null,0,1,0,1];    // Ddim7 xx0101: R, b5, bb7, b3
   if (isMinor) return [null,null,0,2,3,1];
   return              [null,null,0,2,3,2];
 }
@@ -354,6 +356,7 @@ export const OPEN_CHORD_DB = {
   "Dsus2":{ shape:[null,null,0,2,3,0] },
   "Esus2":{ shape:[0,2,4,4,0,0] },
   "Asus2":{ shape:[null,0,2,2,0,0] },
+  "Gsus2":{ shape:[3,0,0,0,3,3] },
   // Sus4 (root-3rd-5th triad with the 3rd swapped for the 4th)
   "Csus4":{ shape:[null,3,3,0,1,1] },
   "Dsus4":{ shape:[null,null,0,2,3,3] },
@@ -429,127 +432,40 @@ export function buildPositionalVoicings(chords, anchor) {
   });
 }
 
-// ─── Theory voicing (chord tone window) ───────────────────────────────────────
-/**
- * Finds a physically playable shape for a dense chord (9ths/11ths/13ths/etc.
- * with no fixed shape) within a limited fret window around baseFret.
- *
- * Two passes:
- *  1. Walk the chord's intervals in priority order and give each one the
- *     closest not-yet-used string that can reach it. This guarantees every
- *     distinct color tone gets a slot before any string doubles up — the
- *     naive per-string search used to let doubled roots crowd out the
- *     chord's actual named extensions (e.g. a "13#11" voicing that never
- *     played the 13 or the #11). If there are more than 4 distinct tones,
- *     the plain 5th is pushed to the back of the priority list, since it's
- *     the tone real chord charts drop first when a dense chord won't fit on
- *     six strings — the 3rd/7th/color tones are what define the sound.
- *  2. Any strings left over (fewer chord tones than strings) get the
- *     nearest available tone, repeats allowed.
- *
- * The window itself is kept to a realistic hand span (4 frets) rather than
- * letting each string reach independently, which used to produce shapes
- * spanning 5-6 frets — impossible to actually fret in one grip.
- */
-function nearestChordToneShape(rootIdx, chordSet, baseFret, offsetMin, offsetMax) {
-  let priority = [...chordSet];
-  if (priority.length > 4 && chordSet.has(7)) {
-    priority = [...priority.filter(iv => iv !== 7), 7];
-  }
-
-  const shape = [null, null, null, null, null, null]; // [str6…str1]
-  const assigned = new Set();
-
-  for (const sem of priority) {
-    let bestSi = null, bestOffset = null, bestDist = Infinity;
-    for (let si = 0; si < 6; si++) {
-      if (assigned.has(si)) continue;
-      const open = STRING_OPEN_NOTE[6 - si];
-      for (let offset = offsetMin; offset <= offsetMax; offset++) {
-        const fret = baseFret + offset;
-        if (fret < 0) continue;
-        if (((open + fret) - rootIdx + 144) % 12 !== sem) continue;
-        const dist = Math.abs(offset);
-        if (dist < bestDist) { bestDist = dist; bestSi = si; bestOffset = offset; }
-      }
-    }
-    if (bestSi !== null) {
-      shape[bestSi] = bestOffset;
-      assigned.add(bestSi);
-    }
-  }
-
-  for (let si = 0; si < 6; si++) {
-    if (assigned.has(si)) continue;
-    const open = STRING_OPEN_NOTE[6 - si];
-    let best = null, bestDist = Infinity;
-    for (let offset = offsetMin; offset <= offsetMax; offset++) {
-      const fret = baseFret + offset;
-      if (fret < 0) continue;
-      const sem = ((open + fret) - rootIdx + 144) % 12;
-      if (!chordSet.has(sem)) continue;
-      const dist = Math.abs(offset);
-      if (dist < bestDist) { bestDist = dist; best = offset; }
-    }
-    shape[si] = best;
-  }
-
-  return shape;
-}
+// ─── Theory voicing ───────────────────────────────────────────────────────────
+// Chord types with a real, commonly used movable shape on each root string
+// (shapeFor6th / shapeFor5th). Anything else has no common shape there.
+const FIXED_SHAPE_QUALITIES = {
+  6: new Set(["", "m", "°", "maj7", "m7", "7", "m7b5", "5", "dim7", "sus4", "maj6", "m6", "m13"]),
+  5: new Set(["", "m", "°", "maj7", "m7", "7", "m7b5", "5", "dim7", "sus2", "sus4", "maj6", "m6", "9"]),
+  4: new Set(["", "m", "°", "maj7", "m7", "7", "m7b5", "5", "dim7", "sus2", "sus4", "maj6", "m6", "+"]),
+};
+const SHAPE_FOR_STRING = { 6: shapeFor6th, 5: shapeFor5th, 4: shapeFor4th };
+const FRET_FOR_STRING  = { 6: fretFor6th,  5: fretFor5th,  4: fretFor4th  };
 
 /**
- * Builds a voicing for the theory block by finding the nearest chord tone on
- * each string within a fret window around the root. Works for all 32 chord
- * types including extended chords where no fixed shape exists.
- *
- * For open chords, falls back to OPEN_CHORD_DB if available.
+ * Builds the Theory block's voicing for a root/chord type/voicing style.
+ * Only real shapes are shown: a fixed movable shape for the 6th/5th string, or
+ * a genuine open shape from OPEN_CHORD_DB. When the chord has no common shape
+ * for that style, returns { noShape: true } instead of inventing a fingering.
  */
 export function buildTheoryVoicing(rootName, chordType, voicingType) {
-  const quality  = chordType.quality;
-  const rootIdx  = noteNameToPitchClass(rootName);
-  const chordSet = new Set(chordType.intervals);
+  const quality = chordType.quality;
+  const rootIdx = noteNameToPitchClass(rootName);
 
-  let baseFret, shape, mutedStrings;
-
+  let baseFret, shape;
   if (voicingType === "Open chord") {
     const ov = OPEN_CHORD_DB[rootName + quality];
-    if (ov) {
-      // Genuine cowboy/open-position shape for this exact root+quality.
-      baseFret = 0;
-      shape    = ov.shape;
-      mutedStrings = ov.shape.map((v,i) => v === null ? i : -1).filter(i => i >= 0);
-    } else {
-      // No named open shape for this root/quality — rather than silently
-      // downgrading to a plain major/minor triad (which would show the wrong
-      // notes under the chord's real label), find a playable shape within
-      // the open position (frets 0-4).
-      baseFret = 0;
-      shape = nearestChordToneShape(rootIdx, chordSet, 0, 0, 4);
-      mutedStrings = shape.map((v,i) => v === null ? i : -1).filter(i => i >= 0);
-    }
+    if (!ov) return { noShape: true };
+    baseFret = 0;
+    shape    = ov.shape;
   } else {
-    const strNum = voicingType === "6th string" ? 6 : 5;
-    baseFret = strNum === 6 ? fretFor6th(rootName) : fretFor5th(rootName);
-
-    // For qualities with a real movable shape (shapeFor6th/shapeFor5th), use it
-    // directly — it's the standard barre-chord fingering (e.g. the classic A7/E7
-    // shapes). Only fall back to the nearest-chord-tone search below for
-    // extended qualities (9ths/11ths/13ths/etc.) that have no fixed shape.
-    const FIXED_SHAPE_QUALITIES_6TH = new Set(["", "m", "°", "maj7", "m7", "7", "m7b5", "5", "dim7", "sus4", "maj6", "m6", "m13"]);
-    const FIXED_SHAPE_QUALITIES_5TH = new Set(["", "m", "°", "maj7", "m7", "7", "m7b5", "5", "dim7", "sus2", "sus4", "maj6", "m6", "9"]);
-    const fixedShapeQualities = strNum === 6 ? FIXED_SHAPE_QUALITIES_6TH : FIXED_SHAPE_QUALITIES_5TH;
-    if (fixedShapeQualities.has(quality)) {
-      shape = strNum === 6 ? shapeFor6th(quality) : shapeFor5th(quality);
-      mutedStrings = shape.map((v,i) => v === null ? i : -1).filter(i => i >= 0);
-    } else {
-      // Extended qualities (9ths/11ths/13ths/etc.) have no fixed shape —
-      // find a playable one within a realistic 4-fret barre-hand span.
-      shape = nearestChordToneShape(rootIdx, chordSet, baseFret, -1, 3);
-      mutedStrings = shape.map((v,i) => v === null ? i : -1).filter(i => i >= 0);
-    }
+    const strNum = parseInt(voicingType, 10); // "6th string" / "5th string" / "4th string"
+    if (!FIXED_SHAPE_QUALITIES[strNum]?.has(quality)) return { noShape: true };
+    baseFret = FRET_FOR_STRING[strNum](rootName);
+    shape    = SHAPE_FOR_STRING[strNum](quality);
   }
-
-  const noPracticalShape = NO_PRACTICAL_SHAPE[voicingType]?.has(quality) ?? false;
+  const mutedStrings = shape.map((v,i) => v === null ? i : -1).filter(i => i >= 0);
 
   // Label each occupied string with its interval
   const stringData = shape.map((offset, si) => {
@@ -568,5 +484,5 @@ export function buildTheoryVoicing(rootName, chordType, voicingType) {
     };
   });
 
-  return { baseFret, shape, mutedStrings, stringData, noPracticalShape };
+  return { noShape: false, baseFret, shape, mutedStrings, stringData };
 }
