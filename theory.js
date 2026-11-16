@@ -198,34 +198,55 @@ export const IONIAN_PROGRESSIONS = [
   { name:"50s Progression",  romans:["I","vi","IV","V"],                       semitones:[0,9,5,7],          qualities:["","m","",""],                difficulty:"beginner",     feel:"Doo-wop, early rock and roll — nostalgic and warm" },
   { name:"Jazz Turnaround",  romans:["ii","V","I"],                            semitones:[2,7,0],            qualities:["m","",""],                   difficulty:"intermediate", feel:"Jazz staple — strong sense of resolution" },
   { name:"Circle of Fifths", romans:["I","IV","vii°","iii","vi","ii","V","I"], semitones:[0,5,11,4,9,2,7,0], qualities:["","","°","m","m","m","",""], difficulty:"advanced",     feel:"Full diatonic circle — builds harmonic vocabulary" },
+  { name:"Rock & Roll",      romans:["I","IV","V","IV"],                       semitones:[0,5,7,5],          qualities:["","","",""],                 difficulty:"beginner",     feel:"Driving three-chord cycle — garage rock and party anthems" },
+  { name:"Diatonic Climb",   romans:["I","ii","iii","IV"],                     semitones:[0,2,4,5],          qualities:["","m","m",""],               difficulty:"beginner",     feel:"Stepwise climb up the scale — builds anticipation" },
+  { name:"Rhythm Changes",   romans:["I","vi","ii","V"],                       semitones:[0,9,2,7],          qualities:["","m","m",""],               difficulty:"intermediate", feel:"The classic jazz turnaround — loops smoothly back to I" },
+  { name:"Canon",            romans:["I","V","vi","iii","IV","I","IV","V"],    semitones:[0,7,9,4,5,0,5,7],  qualities:["","","m","m","","","",""],   difficulty:"advanced",     feel:"Pachelbel-style stepwise bass descent — weddings and pop alike" },
 ];
 
 export const DORIAN_PROGRESSIONS = [
-  { name:"Dorian Vamp",       romans:["i","IV"],             semitones:[0,5],      qualities:["m",""],         difficulty:"beginner",     feel:"The signature Dorian sound — minor ii against major V" },
-  { name:"Soul Groove",       romans:["i","IV","i","IV"],    semitones:[0,5,0,5],  qualities:["m","","m",""],  difficulty:"beginner",     feel:"Repeated ii–V vamp — Santana, Herbie Hancock territory" },
-  { name:"Dorian Turnaround", romans:["i","ii","IV","i"],    semitones:[0,2,5,0],  qualities:["m","m","","m"], difficulty:"intermediate", feel:"Adds the minor iii — highlights the Dorian flavor" },
+  { name:"Dorian Vamp",       romans:["i","IV"],             semitones:[0,5],      qualities:["m",""],         difficulty:"beginner",     feel:"The signature Dorian sound — minor i against major IV" },
+  { name:"Soul Groove",       romans:["i","IV","i","IV"],    semitones:[0,5,0,5],  qualities:["m","","m",""],  difficulty:"beginner",     feel:"Repeated i–IV vamp — Santana, Herbie Hancock territory" },
+  { name:"Dorian Turnaround", romans:["i","ii","IV","i"],    semitones:[0,2,5,0],  qualities:["m","m","","m"], difficulty:"intermediate", feel:"Adds the minor ii — highlights the Dorian flavor" },
   { name:"Modal Jazz",        romans:["i","IV","VII","III"], semitones:[0,5,10,3], qualities:["m","","",""],   difficulty:"advanced",     feel:"So What style — floating, no strong resolution" },
+  { name:"Funk Two-Step",     romans:["i","ii"],             semitones:[0,2],      qualities:["m","m"],        difficulty:"beginner",     feel:"Two minor chords a whole step apart — the classic funk vamp" },
+  { name:"Dorian Rock",       romans:["i","VII","IV","i"],   semitones:[0,10,5,0], qualities:["m","","","m"],  difficulty:"beginner",     feel:"Minor rock lifted by the bright major IV" },
+  { name:"Dorian Cadence",    romans:["i","IV","v","i"],     semitones:[0,5,7,0],  qualities:["m","","m","m"], difficulty:"intermediate", feel:"Minor v keeps it modal — no major-V pull toward harmonic minor" },
+  { name:"Dorian Shuttle",    romans:["i","III","IV","i"],   semitones:[0,3,5,0],  qualities:["m","","","m"],  difficulty:"intermediate", feel:"Rising bass i–III–IV — climbs into the Dorian major IV" },
+  { name:"Dorian Climb",      romans:["i","ii","III","IV"],  semitones:[0,2,3,5],  qualities:["m","m","",""],  difficulty:"advanced",     feel:"Stepwise climb through the mode — arrives on the signature IV" },
 ];
 
 export const PHRYGIAN_PROGRESSIONS = [
   { name:"Phrygian Vamp",     romans:["i","bII"],              semitones:[0,1],      qualities:["m",""],       difficulty:"beginner",     feel:"The essential Phrygian sound — flamenco, metal" },
   { name:"Spanish Cadence",   romans:["i","bVII","bVI","bII"], semitones:[0,10,8,1], qualities:["m","","",""], difficulty:"intermediate", feel:"Andalusian descent — flamenco and classical Spanish" },
   { name:"Metal Riff",        romans:["i","bII","bVII","i"],   semitones:[0,1,10,0], qualities:["m","","","m"],difficulty:"intermediate", feel:"Heavy and dark — common in metal and film scores" },
-  { name:"Phrygian Dominant", romans:["I","bII","i","bII"],    semitones:[0,1,0,1],  qualities:["","","m",""], difficulty:"advanced",     feel:"Major III against IV — Middle Eastern, exotic color" },
+  { name:"Phrygian Dominant", romans:["I","bII","i","bII"],    semitones:[0,1,0,1],  qualities:["","","m",""], difficulty:"advanced",     feel:"Major I against bII — Middle Eastern, exotic color" },
+  { name:"Phrygian Ladder",   romans:["i","bII","bIII","bII"], semitones:[0,1,3,1],  qualities:["m","","",""], difficulty:"beginner",     feel:"Half step then whole step up and back — the classic Phrygian riff shape" },
+  { name:"Doom Crawl",        romans:["i","bVI","bII","i"],    semitones:[0,8,1,0],  qualities:["m","","","m"],difficulty:"intermediate", feel:"Heavy and ominous — doom metal and film-score menace" },
+  { name:"Dark Shuttle",      romans:["i","bIII","bII","i"],   semitones:[0,3,1,0],  qualities:["m","","","m"],difficulty:"intermediate", feel:"Steps down into the tonic through the bII — dark and cinematic" },
+  { name:"Phrygian Minor",    romans:["i","iv","bII","i"],     semitones:[0,5,1,0],  qualities:["m","m","","m"],difficulty:"advanced",    feel:"Minor iv sets up the half-step bII resolution" },
 ];
 
 export const LYDIAN_PROGRESSIONS = [
-  { name:"Lydian Float",    romans:["I","II"],                          semitones:[0,2],      qualities:["",""],                     difficulty:"beginner",     feel:"The Lydian signature — major IV to major V, dreamy lift" },
+  { name:"Lydian Float",    romans:["I","II"],                          semitones:[0,2],      qualities:["",""],                     difficulty:"beginner",     feel:"The Lydian signature — major I to major II, dreamy lift" },
   { name:"Film Score",      romans:["I","II","vii","I"],                semitones:[0,2,11,0], qualities:["","","m",""],              difficulty:"intermediate", feel:"Cinematic and expansive — John Williams territory" },
-  { name:"Lydian Drift",    romans:["I","II","IV","I"],                 semitones:[0,2,6,0],  qualities:["","","°",""],              difficulty:"intermediate", feel:"Uses the vii° diminished — otherworldly and unresolved" },
+  { name:"Lydian Drift",    romans:["I","II","#iv°","I"],               semitones:[0,2,6,0],  qualities:["","","°",""],              difficulty:"intermediate", feel:"Uses the #iv° diminished — otherworldly and unresolved" },
   { name:"Neo-Soul Lydian", romans:["Imaj7","IImaj7","vii m7","Imaj7"], semitones:[0,2,11,0], qualities:["maj7","maj7","m7","maj7"], difficulty:"advanced",     feel:"Extended chords over Lydian — lush and sophisticated" },
+  { name:"Bright Ascent",   romans:["I","II","iii","II"],               semitones:[0,2,4,2],  qualities:["","","m",""],              difficulty:"beginner",     feel:"Stepwise climb that leans on the Lydian major II" },
+  { name:"Lydian Cadence",  romans:["I","V","II","I"],                  semitones:[0,7,2,0],  qualities:["","","",""],               difficulty:"beginner",     feel:"Major II stands in for IV — a brighter, more open resolution" },
+  { name:"Lydian Pop",      romans:["I","V","vi","II"],                 semitones:[0,7,9,2],  qualities:["","","m",""],              difficulty:"intermediate", feel:"The pop loop with major II in place of IV — instantly Lydian" },
+  { name:"Dream Pop",       romans:["I","II","vi","V"],                 semitones:[0,2,9,7],  qualities:["","","m",""],              difficulty:"intermediate", feel:"Floats up to the II, then settles through vi–V" },
 ];
 
 export const MIXOLYDIAN_PROGRESSIONS = [
   { name:"Rock Vamp",         romans:["I","bVII"],              semitones:[0,10],      qualities:["",""],       difficulty:"beginner",     feel:"The rock and blues staple — Sweet Home Alabama, La Grange" },
   { name:"Southern Rock",     romans:["I","bVII","IV","I"],     semitones:[0,10,5,0],  qualities:["","","",""], difficulty:"beginner",     feel:"Classic southern rock — all major chords, bluesy feel" },
-  { name:"Mixolydian Groove", romans:["I","IV","bVII","IV"],    semitones:[0,5,10,5],  qualities:["","","",""], difficulty:"intermediate", feel:"Rotating around the IV — funky and hypnotic" },
-  { name:"Modal Rock",        romans:["I","bVII","bVI","bVII"], semitones:[0,10,8,10], qualities:["","","",""], difficulty:"intermediate", feel:"Adds the bIII — heavier, more dramatic color" },
+  { name:"Mixolydian Groove", romans:["I","IV","bVII","IV"],    semitones:[0,5,10,5],  qualities:["","","",""], difficulty:"intermediate", feel:"Rotating around bVII — funky and hypnotic" },
+  { name:"Modal Rock",        romans:["I","bVII","bVI","bVII"], semitones:[0,10,8,10], qualities:["","","",""], difficulty:"intermediate", feel:"Adds the bVI — heavier, more dramatic color" },
+  { name:"Mixolydian Blues",  romans:["I","IV","I","bVII"],     semitones:[0,5,0,10],  qualities:["","","",""],  difficulty:"beginner",     feel:"Bluesy shuffle with a bVII turnaround" },
+  { name:"Mixolydian Cadence",romans:["I","v","IV","I"],        semitones:[0,7,5,0],   qualities:["","m","",""], difficulty:"intermediate", feel:"The minor v softens the cadence — a Mixolydian giveaway" },
+  { name:"Mixolydian Pop",    romans:["I","bVII","vi","IV"],    semitones:[0,10,9,5],  qualities:["","","m",""], difficulty:"intermediate", feel:"Descending bass from the bVII — wistful pop-rock" },
+  { name:"Jam Band",          romans:["I","v","vi","IV"],       semitones:[0,7,9,5],   qualities:["","m","m",""],difficulty:"advanced",     feel:"The pop loop with a minor v — moodier, jam-band color" },
 ];
 
 export const AEOLIAN_PROGRESSIONS = [
@@ -234,12 +255,20 @@ export const AEOLIAN_PROGRESSIONS = [
   { name:"Andalusian",       romans:["i","VII","VI","v"],   semitones:[0,10,8,7], qualities:["m","","","m"], difficulty:"intermediate", feel:"Descending bass line — dramatic and classical" },
   { name:"Minor Turnaround", romans:["i","VI","VII","i"],   semitones:[0,8,10,0], qualities:["m","","","m"], difficulty:"intermediate", feel:"Circular and hypnotic — common in rock and pop" },
   { name:"Minor Jazz Cadence", romans:["ii°","v","i"],      semitones:[2,7,0],    qualities:["°","m","m"],   difficulty:"advanced",     feel:"Natural minor ii–V–i — darker than harmonic minor version" },
+  { name:"Watchtower",       romans:["i","VII","VI"],       semitones:[0,10,8],   qualities:["m","",""],     difficulty:"beginner",     feel:"Driving three-chord minor descent — a classic rock staple" },
+  { name:"Minor Rock",       romans:["i","iv","v","i"],     semitones:[0,5,7,0],  qualities:["m","m","m","m"],difficulty:"beginner",    feel:"All-minor cadence — moody and grounded" },
+  { name:"Power Ballad",     romans:["i","iv","VII","III"], semitones:[0,5,10,3], qualities:["m","m","",""], difficulty:"intermediate", feel:"Lifts toward the relative major — anthemic and bittersweet" },
+  { name:"Minor Circle",     romans:["i","iv","VII","III","VI","ii°","v","i"], semitones:[0,5,10,3,8,2,7,0], qualities:["m","m","","","","°","m","m"], difficulty:"advanced", feel:"Full circle of fourths in minor — Autumn Leaves territory" },
 ];
 
 export const LOCRIAN_PROGRESSIONS = [
-  { name:"Locrian Vamp",    romans:["i°","bII"],              semitones:[0,1],      qualities:["°",""],        difficulty:"intermediate", feel:"Tense and unstable — the diminished vii° resolves nowhere" },
+  { name:"Locrian Vamp",    romans:["i°","bII"],              semitones:[0,1],      qualities:["°",""],        difficulty:"intermediate", feel:"Tense and unstable — the diminished i° resolves nowhere" },
   { name:"Half-Diminished", romans:["i°","bVII","bVI","bII"], semitones:[0,10,8,1], qualities:["°","m","",""], difficulty:"intermediate", feel:"Used in jazz over m7b5 chords — dark and sophisticated" },
   { name:"Metal Locrian",   romans:["i°","bII","bV","bII"],   semitones:[0,1,6,1],  qualities:["°","","",""],  difficulty:"advanced",     feel:"Extreme dissonance — tritone relationships, avant-garde metal" },
+  { name:"Tritone Pulse",   romans:["i°","bV"],               semitones:[0,6],      qualities:["°",""],        difficulty:"intermediate", feel:"The tritone root jump — the most unstable move in the modes" },
+  { name:"Locrian Shuttle", romans:["i°","biii","bII","i°"],  semitones:[0,3,1,0],  qualities:["°","m","","°"], difficulty:"intermediate", feel:"Hovers around the unstable tonic — tense, horror-score color" },
+  { name:"Locrian Dirge",   romans:["i°","bVI","bvii","i°"],  semitones:[0,8,10,0], qualities:["°","","m","°"], difficulty:"intermediate", feel:"Slow, heavy descent — doom and sludge territory" },
+  { name:"Locrian Minor",   romans:["i°","iv","bII","i°"],    semitones:[0,5,1,0],  qualities:["°","m","","°"], difficulty:"advanced",     feel:"Minor iv and bII circle a tonic that never settles" },
 ];
 
 const PROGRESSIONS_BY_SCALE = {
@@ -258,10 +287,7 @@ const PROGRESSIONS_BY_SCALE = {
 // scaleNameForProgression below) instead of landing on a random, mismatched one.
 const ALL_PROGRESSIONS = {};
 for (const [scaleName, list] of Object.entries(PROGRESSIONS_BY_SCALE)) {
-  for (const p of list) {
-    p.displayRomans = displayRomansFor(p, scaleName);
-    ALL_PROGRESSIONS[p.name] = { ...p, scaleName };
-  }
+  for (const p of list) ALL_PROGRESSIONS[p.name] = { ...p, scaleName };
 }
 
 export function progressionsFor(scaleName) {
@@ -273,41 +299,9 @@ export function scaleNameForProgression(name) {
   return ALL_PROGRESSIONS[name]?.scaleName ?? null;
 }
 
-/** Degree index (0-6) that decides where a progression chord sits on the neck
- *  (see buildPositionalVoicings). Ionian and Aeolian count from the block's
- *  own root, but every other mode counts from its parent major's root — the
- *  parent's root is the "one chord" — so the progression lands in the same
- *  hand position as the parent-major shape the Scale Walk shows for that mode
- *  (e.g. G Mixolydian's I–bVII is placed as V–IV of C major). A chromatic
- *  borrowing (e.g. Mixolydian's bVI) takes the degree it's a flattened form of. */
-function positionalDegree(scaleName, semitone, ownDegree) {
-  if (scaleName === "Major (Ionian)" || scaleName === "Minor (Aeolian)") return ownDegree;
-  const major      = SCALE_INTERVALS["Major (Ionian)"];
-  const fromParent = (semitone + (MODE_OFFSET[scaleName] || 0)) % 12;
-  const idx        = major.indexOf(fromParent);
-  return idx !== -1 ? idx : major.indexOf((fromParent + 1) % 12);
-}
-
-/** Roman numerals shown to the user for a progression. Ionian and Aeolian
- *  read as written (from the block's own root); every other mode is relabeled
- *  from its parent major's root, matching positionalDegree — e.g. Dorian's
- *  i–IV reads ii–V, Mixolydian's I–bVII reads V–IV. `romans` itself stays
- *  mode-relative because buildProgressionChords spells chord roots from it. */
-function displayRomansFor(progression, scaleName) {
-  if (scaleName === "Major (Ionian)" || scaleName === "Minor (Aeolian)") return progression.romans;
-  const major = SCALE_INTERVALS["Major (Ionian)"];
-  return progression.romans.map((roman, i) => {
-    const semitone = progression.semitones[i];
-    const quality  = progression.qualities[i];
-    const isMinor  = quality.startsWith("m") && !quality.startsWith("maj");
-    const isDim    = quality.includes("°");
-    const numeral  = ["I","II","III","IV","V","VI","VII"][positionalDegree(scaleName, semitone, 0)];
-    const flat     = major.includes((semitone + (MODE_OFFSET[scaleName] || 0)) % 12) ? "" : "b";
-    const suffix   = isDim ? "°" : (quality === "" || quality === "m") ? "" : isMinor ? " " + quality : quality;
-    return flat + (isMinor || isDim ? numeral.toLowerCase() : numeral) + suffix;
-  });
-}
-
+// Every progression — modes included — counts from the block's own root: the
+// mode's tonic is the one chord (D Dorian's i is Dm), so romans read as written
+// and the i/I chord is the one anchored on the chosen string when voiced.
 export function buildProgressionChords(rootName, scaleName, progressionName, use7ths) {
   const progression = ALL_PROGRESSIONS[progressionName] || IONIAN_PROGRESSIONS[0];
   return progression.romans.map((roman, i) => {
@@ -317,7 +311,7 @@ export function buildProgressionChords(rootName, scaleName, progressionName, use
       ? seventhQualityFor(scaleName, semitone, progression.qualities[i])
       : progression.qualities[i];
     const root = spellChordTone(rootName, semitone, String(degreeNum));
-    return { degree: positionalDegree(scaleName, semitone, degreeNum - 1), name: root + quality, root, quality };
+    return { degree: degreeNum - 1, name: root + quality, root, quality };
   });
 }
 
